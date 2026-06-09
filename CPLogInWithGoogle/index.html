@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker App</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 用户菜单样式 */
+        .user-menu-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            position: relative;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .user-avatar img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9ff;
+        }
+        
+        .dropdown-item.logout {
+            color: #f44336;
+        }
+        
+        .user-info-text {
+            padding: 12px 18px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .user-email {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <!-- 用户菜单 -->
+    <div class="user-menu-container" id="userMenuContainer">
+        <div class="user-avatar" id="userAvatar">
+            👤
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+            <div class="user-info-text" id="userInfoText">
+                <div class="user-name">Loading...</div>
+                <div class="user-email">...</div>
+            </div>
+            <div class="dropdown-item logout" id="logoutBtn">
+                <span>🚪</span> Sign Out
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar with Budget Progress -->
+        <aside class="sidebar">
+            <div class="budget-card">
+                <h3>Remaining</h3>
+                <div class="budget-amount" id="remainingDisplay">$0.00</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                        <div class="zero-line" id="zeroLine"></div>
+                        <div class="savings-line" id="savingsLine"></div>
+                    </div>
+                </div>
+                <div class="budget-stats">
+                    <div class="stat">
+                        <span class="stat-label">Spent:</span>
+                        <span class="stat-value" id="spentDisplay">$0.00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Earned:</span>
+                        <span class="stat-value earned" id="earnedDisplay">$0.00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Monthly Budget:</span>
+                        <span class="stat-value" id="budgetDisplay">$0.00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Savings Goal:</span>
+                        <span class="stat-value" id="goalDisplay">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Navigation Menu -->
+            <nav class="menu">
+                <button class="menu-btn" data-page="spendings">Spendings</button>
+                <button class="menu-btn" data-page="limits">Limits</button>
+                <button class="menu-btn" data-page="history">History</button>
+                <button class="menu-btn active" data-page="summary">Summary</button>
+            </nav>
+
+            <!-- Setup Modal -->
+            <section id="setup" class="setup-modal hidden">
+                <div class="setup-modal-card">
+                    <h1>Monthly Setup</h1>
+                    <p class="setup-note">Set your monthly budget and savings goal before tracking your spending.</p>
+                    <div class="setup-form">
+                    <div class="form-group">
+                        <label for="monthlyBudget">Monthly Budget:</label>
+                        <input type="number" id="monthlyBudget" placeholder="Enter your monthly budget" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="savingsGoal">Savings Goal:</label>
+                        <input type="number" id="savingsGoal" placeholder="Enter your savings goal" min="0" step="0.01">
+                    </div>
+
+                    <h2>Category Management</h2>
+                    <div class="category-section">
+                        <div class="category-list" id="categoryList">
+                            <!-- Categories will be populated here -->
+                        </div>
+
+                        <div class="add-category-form">
+                            <h3>Add Category</h3>
+                            <div class="form-group">
+                                <label for="newCategoryName">Category Name:</label>
+                                <input type="text" id="newCategoryName" placeholder="e.g., Food, Transport">
+                            </div>
+                            <div class="form-group">
+                                <label for="newCategoryLimit">Limit (leave empty for no limit):</label>
+                                <input type="number" id="newCategoryLimit" placeholder="Enter limit" min="0" step="0.01">
+                            </div>
+                            <button id="addCategoryBtn" class="btn-primary">Add Category</button>
+                        </div>
+                    </div>
+
+                        <button id="saveSetupBtn" class="btn-primary">Save Setup</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Spendings Page -->
+            <section id="spendings" class="page">
+                <h1>Add Spending</h1>
+                <div class="mode-toggle" style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+                    <button id="dailyModeBtn" class="btn-primary">Daily Spendings</button>
+                    <button id="fixedModeBtn" class="btn-secondary">Fixed Spendings</button>
+                </div>
+                <div class="spendings-form">
+                    <div class="form-group">
+                        <label for="spendingAmount">Amount:</label>
+                        <input type="number" id="spendingAmount" placeholder="Enter amount" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="spendingType">Type:</label>
+                        <select id="spendingType">
+                            <option value="outcome">Outcome</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="dateGroup">
+                        <label for="spendingDate">Date:</label>
+                        <input type="date" id="spendingDate">
+                    </div>
+                    <div class="form-group hidden" id="periodGroup">
+                        <label for="spendingPeriod">Repeat Every:</label>
+                        <select id="spendingPeriod">
+                            <option value="daily">Every Day</option>
+                            <option value="weekly">Every Week</option>
+                            <option value="monthly">Every Month</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group hidden" id="customPeriodGroup">
+                        <label for="customPeriodText">Custom Period:</label>
+                        <input type="text" id="customPeriodText" placeholder="e.g. every 2 weeks">
+                    </div>
+                    <div class="form-group">
+                        <label for="spendingCategory">Category:</label>
+                        <select id="spendingCategory">
+                            <option value="">Select a category</option>
+                        </select>
+                    </div>
+                    <button id="addSpendingBtn" class="btn-primary">Add Spendings</button>
+                </div>
+
+                <div class="setup-form" style="max-width: 100%; margin-top: 20px;">
+                    <h2>Fixed Spendings</h2>
+                    <div id="fixedSpendingsList" class="history-list"></div>
+                </div>
+
+                <section id="fixedEditModal" class="setup-modal hidden">
+                    <div class="setup-modal-card" style="max-width: 420px;">
+                        <h2>Edit Fixed Spending</h2>
+                        <div class="form-group">
+                            <label for="fixedEditAmount">Amount:</label>
+                            <input type="number" id="fixedEditAmount" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="fixedEditCategory">Category:</label>
+                            <select id="fixedEditCategory"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fixedEditPeriod">Repeat Every:</label>
+                            <select id="fixedEditPeriod">
+                                <option value="daily">Every Day</option>
+                                <option value="weekly">Every Week</option>
+                                <option value="monthly">Every Month</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="fixedEditCustomGroup" hidden>
+                            <label for="fixedEditCustomPeriod">Custom Period:</label>
+                            <input type="text" id="fixedEditCustomPeriod" placeholder="e.g. every 2 weeks">
+                        </div>
+                        <div class="form-group">
+                            <label for="fixedEditStartDate">Start Date:</label>
+                            <input type="date" id="fixedEditStartDate">
+                        </div>
+                        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top: 10px;">
+                            <button id="cancelFixedEditBtn" class="btn-secondary">Cancel</button>
+                            <button id="saveFixedEditBtn" class="btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Limits Page -->
+            <section id="limits" class="page">
+                <h1>Category Limits</h1>
+                <div class="limits-panel">
+                    <div class="setup-form" style="max-width: 100%; margin-bottom: 20px;">
+                        <h2>Add or Update Category Limits</h2>
+                        <div class="form-group">
+                            <label for="limitCategoryName">Category Name:</label>
+                            <input type="text" id="limitCategoryName" placeholder="e.g., Entertainment">
+                        </div>
+                        <div class="form-group">
+                            <label for="limitCategoryAmount">Monthly Limit:</label>
+                            <input type="number" id="limitCategoryAmount" placeholder="Optional limit" min="0" step="0.01">
+                        </div>
+                        <button id="addLimitCategoryBtn" class="btn-primary">Add Category</button>
+                    </div>
+
+                    <div class="setup-form" style="max-width: 100%; margin-bottom: 20px;">
+                        <h2>Set Category Limits</h2>
+                        <div id="limitsCategoryList" class="limits-list"></div>
+                        <button id="saveLimitsBtn" class="btn-primary">Save Limits</button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- History Page -->
+            <section id="history" class="page">
+                <h1>Spending History</h1>
+                <div class="history-filters">
+                    <div class="filter-group">
+                        <label for="filterCategory">Filter by Category:</label>
+                        <select id="filterCategory">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterType">Filter by Type:</label>
+                        <select id="filterType">
+                            <option value="">All Types</option>
+                            <option value="income">Income Only</option>
+                            <option value="outcome">Outcome Only</option>
+                        </select>
+                    </div>
+                    <button id="resetFiltersBtn" class="btn-secondary">Reset Filters</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be populated here -->
+                </div>
+            </section>
+
+            <!-- Summary Page -->
+            <section id="summary" class="page">
+                <h1>Monthly Summary</h1>
+                <div class="summary-content">
+                    <div class="summary-section">
+                        <h2>Overview</h2>
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <span class="summary-label">Total Spent:</span>
+                                <span class="summary-value" id="summarySpent">$0.00</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">Total Earned:</span>
+                                <span class="summary-value earned" id="summaryEarned">$0.00</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">Net Difference:</span>
+                                <span class="summary-value" id="summaryDifference">$0.00</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">Remaining Budget:</span>
+                                <span class="summary-value" id="summaryRemaining">$0.00</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">Savings Goal:</span>
+                                <span class="summary-value" id="summarySavingsGoal">$0.00</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">Savings Status:</span>
+                                <span class="summary-value" id="savingsStatus">Not Set</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-section">
+                        <h2>Budget & Savings</h2>
+                        <div class="budget-form-grid">
+                            <div class="form-group">
+                                <label for="summaryMonthlyBudgetInput">Monthly Budget</label>
+                                <input type="number" id="summaryMonthlyBudgetInput" placeholder="Enter monthly budget" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="summarySavingsGoalInput">Savings Goal</label>
+                                <input type="number" id="summarySavingsGoalInput" placeholder="Enter savings goal" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <button id="updateBudgetBtn" class="btn-primary">Update Budget</button>
+                    </div>
+
+                    <div class="summary-section">
+                        <h2>Spending Distribution</h2>
+                        <div class="categories-breakdown" id="categoriesBreakdown">
+                            <!-- Category breakdown will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
