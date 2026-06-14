@@ -399,6 +399,7 @@
       height: 30px;
     }
 
+
     .switch input { position: absolute; opacity: 0; pointer-events: none; }
     .switch span { width: 100%; border-radius: 999px; background: #9ca8a0; transition: .2s; }
     .switch span::after { content: ""; position: absolute; top: 4px; left: 4px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.2); transition: .2s; }
@@ -454,19 +455,27 @@
       .setting-row { align-items: flex-start; }
       .setting-control { width: 50%; }
     }
+
+    .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px}.type-button{min-height:46px;padding:10px;border:1px solid var(--border);border-radius:11px;color:var(--muted);background:var(--surface);font-weight:800}.type-button.active[data-type="outcome"]{color:#fff;background:var(--danger)}.type-button.active[data-type="income"]{color:#fff;background:#16834f}.field.full{grid-column:1/-1}.field-label{font-weight:750;font-size:.9rem}
+    .filter-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:12px;align-items:end}.custom-date-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.toolbar{margin:20px 0 12px}.result-count{color:var(--muted);font-size:.9rem}
+    .history-item{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.transaction-amount.outcome{color:var(--danger)}.transaction-amount.income{color:#16834f}
+    .category-preview{display:grid;gap:12px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}.preview-row-head{display:flex;justify-content:space-between;gap:12px;font-size:.86rem}.preview-row-head span:last-child{color:var(--muted);text-align:right}.mini-meter{height:8px;margin:7px 0 0;overflow:hidden;border-radius:999px;background:var(--border)}.mini-meter span{display:block;height:100%;border-radius:inherit;background:var(--brand)}.mini-meter span.over{background:var(--danger)}
+    .category-budget-list{display:grid;gap:12px;margin-top:18px}.category-budget-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(120px,.8fr) minmax(170px,1.2fr);gap:15px;align-items:center;padding:14px;border:1px solid var(--border);border-radius:14px}.category-budget-row.over{border-color:#e9a7a7;background:#fff0f0}.high-contrast .category-budget-row.over{background:#351414}.category-name{font-weight:800}.category-spend{font-size:.88rem;color:var(--muted)}.warning{color:var(--danger);font-weight:850}.account-name{margin:4px 8px 0;font-weight:850}.account-email{margin-top:2px}
+    @media(max-width:900px){.filter-bar{grid-template-columns:1fr 1fr}.reset-wrap{grid-column:1/-1}.reset-wrap button{width:100%}.category-budget-row{grid-template-columns:1fr 1fr}.category-progress{grid-column:1/-1}}@media(max-width:780px){.history-item{grid-template-columns:minmax(0,1fr) auto}.history-item .delete-button{grid-column:1/-1;width:100%}}@media(max-width:520px){.form-grid,.filter-bar,.custom-date-row,.category-budget-row{grid-template-columns:1fr}.field.full,.reset-wrap,.category-progress{grid-column:auto}}
+
   </style>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div class="brand" aria-label="PennyWiseBT">
-        <span class="brand-mark" aria-hidden="true">💰</span>
+        <span class="brand-mark" aria-hidden="true">馃挵</span>
         <span>PennyWiseBT</span>
       </div>
 
       <div class="top-actions">
-        <button class="icon-button avatar-button" id="avatarButton" type="button" aria-label="Account" aria-expanded="false">👤</button>
-        <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">⚙️</button>
+        <button class="icon-button avatar-button" id="avatarButton" type="button" aria-label="Account" aria-expanded="false">馃懁</button>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">鈿欙笍</button>
         <div class="account-menu" id="accountMenu" hidden>
           <p class="account-name" id="accountName">Account</p>
           <p class="account-email" id="accountEmail"></p>
@@ -478,7 +487,8 @@
 
     <nav class="main-nav" aria-label="Main navigation">
       <button class="nav-button active" type="button" data-page="dashboard" data-i18n="dashboard">Dashboard</button>
-      <button class="nav-button" type="button" data-page="transactions" data-i18n="transactions">Transactions</button>
+      <button class="nav-button" type="button" data-page="add" data-i18n="addExpense">Add Expense</button>
+      <button class="nav-button" type="button" data-page="history" data-i18n="history">History</button>
       <button class="nav-button" type="button" data-page="budget" data-i18n="budgetSetup">Budget Setup</button>
       <button class="nav-button" type="button" data-page="achievements" data-i18n="achievements">Achievements</button>
     </nav>
@@ -502,7 +512,7 @@
           <article class="card">
             <div class="card-header">
               <h2 data-i18n="recentTransactions">Recent transactions</h2>
-              <button class="secondary-button" type="button" data-go-page="transactions" data-i18n="viewAll">View all</button>
+              <button class="secondary-button" type="button" data-go-page="history" data-i18n="viewAll">View all</button>
             </div>
             <ul class="recent-list" id="recentList"></ul>
           </article>
@@ -513,40 +523,40 @@
               <span id="budgetPercent">0%</span>
               <span data-i18n="used">used</span>
             </div>
+            <div class="category-preview">
+              <h3 data-i18n="categoryOverview">Category budget overview</h3>
+              <div id="categoryPreview"></div>
+            </div>
           </article>
         </div>
       </section>
 
-      <section class="page" id="transactionsPage">
-        <header class="section-heading">
-          <h1 data-i18n="transactions">Transactions</h1>
-          <p class="lede" data-i18n="transactionsIntro">Add expenses in any supported currency. PennyWiseBT handles the conversion.</p>
-        </header>
-        <article class="card">
-          <form class="form-grid" id="transactionForm">
-            <div class="field">
-              <label for="descriptionInput" data-i18n="description">Description</label>
-              <input id="descriptionInput" type="text" maxlength="80" required data-i18n-placeholder="descriptionPlaceholder" placeholder="e.g. Groceries">
-            </div>
-            <div class="field">
-              <label for="amountInput" data-i18n="amount">Amount</label>
-              <input id="amountInput" type="number" min="0.01" step="0.01" inputmode="decimal" required placeholder="0.00">
-            </div>
-            <div class="field">
-              <label for="transactionCurrency" data-i18n="currency">Currency</label>
-              <select id="transactionCurrency">
-                <option value="CAD">CAD</option>
-                <option value="CNY">CNY</option>
-                <option value="USD">USD</option>
-                <option value="JPY">JPY</option>
-              </select>
-            </div>
-            <button class="primary-button" type="submit" data-i18n="addTransaction">Add transaction</button>
-          </form>
-        </article>
-        <ul class="transaction-list" id="transactionList"></ul>
+      <section class="page" id="addPage">
+        <header class="section-heading"><h1 data-i18n="addExpense">Add Expense</h1><p class="lede" data-i18n="addIntro">Record an expense or income.</p></header>
+        <article class="card"><form class="form-grid" id="transactionForm">
+          <div class="field full"><span class="field-label" data-i18n="type">Type</span><div class="type-toggle"><button class="type-button active" data-type="outcome" type="button" data-i18n="expense">Expense</button><button class="type-button" data-type="income" type="button" data-i18n="income">Income</button></div></div>
+          <div class="field"><label for="categoryInput" data-i18n="category">Category</label><select id="categoryInput" required></select></div>
+          <div class="field"><label for="descriptionInput" data-i18n="description">Description</label><input id="descriptionInput" maxlength="80" required data-i18n-placeholder="descriptionPlaceholder"></div>
+          <div class="field"><label for="amountInput" data-i18n="amount">Amount</label><input id="amountInput" type="number" min=".01" step=".01" required></div>
+          <div class="field"><label for="transactionCurrency" data-i18n="currency">Currency</label><select id="transactionCurrency"><option>CAD</option><option>CNY</option><option>USD</option><option>JPY</option></select></div>
+          <div class="field"><label for="dateInput" data-i18n="date">Date</label><input id="dateInput" type="date" required></div>
+          <div class="field full"><button class="primary-button" type="submit" data-i18n="saveRecord">Save record</button></div>
+        </form></article>
       </section>
-
+      <section class="page" id="historyPage">
+        <header class="section-heading"><h1 data-i18n="history">History</h1><p class="lede" data-i18n="historyIntro">Filter, sort, and manage all records.</p></header>
+        <article class="card">
+          <div class="filter-bar">
+            <div class="field"><label for="filterCategory" data-i18n="categoryFilter">Category</label><select id="filterCategory"></select></div>
+            <div class="field"><label for="filterType" data-i18n="typeFilter">Type</label><select id="filterType"><option value="all" data-i18n="all">All</option><option value="outcome" data-i18n="expense">Expense</option><option value="income" data-i18n="income">Income</option></select></div>
+            <div class="field"><label for="filterRange" data-i18n="dateRange">Date range</label><select id="filterRange"><option value="week" data-i18n="thisWeek">This week</option><option value="month" data-i18n="thisMonth" selected>This month</option><option value="custom" data-i18n="custom">Custom</option><option value="all" data-i18n="allTime">All time</option></select></div>
+            <div class="field"><label for="sortHistory" data-i18n="sortBy">Sort</label><select id="sortHistory"><option value="newest" data-i18n="newest">Newest</option><option value="oldest" data-i18n="oldest">Oldest</option><option value="high" data-i18n="amountHigh">High to low</option><option value="low" data-i18n="amountLow">Low to high</option></select></div>
+            <div class="reset-wrap"><button class="secondary-button" id="resetFilters" type="button" data-i18n="resetFilters">Reset filters</button></div>
+          </div>
+          <div class="custom-date-row" id="customDateRow" hidden><div class="field"><label for="customStart" data-i18n="startDate">Start</label><input id="customStart" type="date"></div><div class="field"><label for="customEnd" data-i18n="endDate">End</label><input id="customEnd" type="date"></div></div>
+          <div class="toolbar"><span class="result-count" id="resultCount"></span></div><ul class="transaction-list" id="historyList"></ul>
+        </article>
+      </section>
       <section class="page" id="budgetPage">
         <header class="section-heading">
           <h1 data-i18n="budgetSetup">Budget Setup</h1>
@@ -561,6 +571,7 @@
             <button class="primary-button" type="submit" data-i18n="saveBudget">Save budget</button>
           </form>
         </article>
+        <article class="card" style="margin-top:18px"><div class="card-header"><div><h2 data-i18n="categoryBudgets">Category budgets</h2><p class="lede" style="margin:5px 0 0" data-i18n="categoryBudgetsIntro">Set monthly limits.</p></div><button class="primary-button" id="saveCategoryBudgets" type="button" data-i18n="saveLimits">Save limits</button></div><div class="category-budget-list" id="categoryBudgetList"></div></article>
       </section>
 
       <section class="page" id="achievementsPage">
@@ -570,17 +581,17 @@
         </header>
         <div class="achievement-grid">
           <article class="achievement" id="firstStepAchievement">
-            <span class="achievement-icon" aria-hidden="true">🌱</span>
+            <span class="achievement-icon" aria-hidden="true">馃尡</span>
             <h2 data-i18n="firstStep">First step</h2>
             <p data-i18n="firstStepDesc">Add your first transaction.</p>
           </article>
           <article class="achievement" id="trackerAchievement">
-            <span class="achievement-icon" aria-hidden="true">🧾</span>
+            <span class="achievement-icon" aria-hidden="true">馃Ь</span>
             <h2 data-i18n="steadyTracker">Steady tracker</h2>
             <p data-i18n="steadyTrackerDesc">Record five transactions.</p>
           </article>
           <article class="achievement" id="onBudgetAchievement">
-            <span class="achievement-icon" aria-hidden="true">🏆</span>
+            <span class="achievement-icon" aria-hidden="true">馃弳</span>
             <h2 data-i18n="onBudget">On budget</h2>
             <p data-i18n="onBudgetDesc">Keep spending within your monthly budget.</p>
           </article>
@@ -593,7 +604,7 @@
     <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <header class="modal-header">
         <h2 id="settingsTitle" data-i18n="settings">Settings</h2>
-        <button class="icon-button" id="closeSettingsButton" type="button" aria-label="Close">✕</button>
+        <button class="icon-button" id="closeSettingsButton" type="button" aria-label="Close">鉁?/button>
       </header>
       <div class="modal-content">
         <section class="settings-section">
@@ -605,7 +616,7 @@
           </div>
           <div class="setting-row">
             <div class="setting-copy">
-              <strong data-i18n="currentEmail">Current email</strong>
+              <strong id="settingsAccountName">Account</strong><small data-i18n="currentEmail">Current email</small>
               <small id="settingsEmail">alex@example.com</small>
             </div>
           </div>
@@ -653,8 +664,8 @@
             <label for="languageSelect" data-i18n="displayLanguage">Display language</label>
             <select class="setting-control" id="languageSelect">
               <option value="en">English</option>
-              <option value="zh">中文</option>
-              <option value="fr">Français</option>
+              <option value="zh">涓枃</option>
+              <option value="fr">Fran莽ais</option>
             </select>
           </div>
         </section>
@@ -679,499 +690,52 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    (() => {
-      "use strict";
-
-      const AUTH_STORAGE_KEY = "budgetTrackerUser";
-      const STORAGE_KEY = "pennyWiseBT_v2";
-      const RATES_IN_CAD = Object.freeze({ CAD: 1, USD: 1.35, CNY: 1.35 / 7.2, JPY: 1.35 / 150 });
-      const supportedLanguages = ["en", "zh", "fr"];
-
-      function loadAuthenticatedUser() {
-        try {
-          const user = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY));
-          return user && user.uid && user.email ? user : null;
-        } catch {
-          return null;
-        }
-      }
-
-      const authenticatedUser = loadAuthenticatedUser();
-      if (!authenticatedUser) {
-        window.location.replace("login.html");
-        return;
-      }
-
-      const translations = {
-        en: {
-          dashboard: "Dashboard", transactions: "Transactions", budgetSetup: "Budget Setup", achievements: "Achievements",
-          spentThisMonth: "Spent this month", remainingThisMonth: "Remaining this month", monthlyBudget: "Monthly budget",
-          recentTransactions: "Recent transactions", viewAll: "View all", budgetProgress: "Budget progress", used: "used",
-          transactionsIntro: "Add expenses in any supported currency. PennyWiseBT handles the conversion.",
-          description: "Description", descriptionPlaceholder: "e.g. Groceries", amount: "Amount", currency: "Currency",
-          addTransaction: "Add transaction", budgetIntro: "Set the total you plan to spend this month.", saveBudget: "Save budget",
-          achievementsIntro: "Small wins make strong money habits.", firstStep: "First step", firstStepDesc: "Add your first transaction.",
-          steadyTracker: "Steady tracker", steadyTrackerDesc: "Record five transactions.", onBudget: "On budget",
-          onBudgetDesc: "Keep spending within your monthly budget.", settings: "Settings", accountManagement: "Account Management",
-          currentEmail: "Current email", deleteAllData: "Delete all my data", careSettings: "Accessibility Features",
-          careSettingsDesc: "Adjust PennyWiseBT for easier reading and navigation.", fontSize: "Font size", normal: "Normal",
-          large: "Large", extraLarge: "Extra Large", buttonOutline: "Button outline",
-          buttonOutlineDesc: "Add a strong blue outline to buttons.", highContrast: "High contrast mode",
-          highContrastDesc: "Use dark backgrounds and brighter controls.", language: "Language", displayLanguage: "Display language",
-          currencySettings: "Currency", currencyDesc: "Amounts are displayed in your default currency using fixed demo rates.",
-          defaultCurrency: "Default currency", switchAccount: "Switch account", logout: "Logout", login: "Login",
-          delete: "Delete", noTransactions: "No transactions yet.", transactionCount: "{count} transactions this month",
-          confirmDelete: "Delete all transactions, budget data, and preferences? This cannot be undone.",
-          dataDeleted: "All local data was deleted.", transactionAdded: "Transaction added.", transactionDeleted: "Transaction deleted.",
-          budgetSaved: "Budget saved.", settingsSaved: "Setting saved.", switchedAccount: "Account switched (demo).",
-          loggedOut: "You are logged out (demo).", loggedIn: "You are logged in (demo).",
-          mockGroceries: "Weekend groceries", mockTransit: "Transit pass", mockCoffee: "Coffee with a friend"
-        },
-        zh: {
-          dashboard: "仪表板", transactions: "交易记录", budgetSetup: "预算设置", achievements: "成就",
-          spentThisMonth: "本月已花费", remainingThisMonth: "本月剩余", monthlyBudget: "每月预算",
-          recentTransactions: "最近交易", viewAll: "查看全部", budgetProgress: "预算进度", used: "已使用",
-          transactionsIntro: "使用支持的任意货币添加支出，PennyWiseBT 会自动换算。",
-          description: "描述", descriptionPlaceholder: "例如：杂货", amount: "金额", currency: "货币",
-          addTransaction: "添加交易", budgetIntro: "设置您本月计划支出的总额。", saveBudget: "保存预算",
-          achievementsIntro: "小小的胜利能培养稳健的理财习惯。", firstStep: "第一步", firstStepDesc: "添加您的第一笔交易。",
-          steadyTracker: "坚持记录", steadyTrackerDesc: "记录五笔交易。", onBudget: "控制预算",
-          onBudgetDesc: "将支出保持在每月预算以内。", settings: "设置", accountManagement: "账户管理",
-          currentEmail: "当前邮箱", deleteAllData: "删除我的所有数据", careSettings: "无障碍功能",
-          careSettingsDesc: "调整 PennyWiseBT，使阅读和操作更加轻松。", fontSize: "字体大小", normal: "正常",
-          large: "大", extraLarge: "特大", buttonOutline: "按钮轮廓",
-          buttonOutlineDesc: "为所有按钮添加醒目的蓝色轮廓。", highContrast: "高对比度模式",
-          highContrastDesc: "使用深色背景和高亮控件。", language: "语言", displayLanguage: "显示语言",
-          currencySettings: "货币", currencyDesc: "金额使用固定演示汇率显示为您的默认货币。",
-          defaultCurrency: "默认货币", switchAccount: "切换账户", logout: "退出登录", login: "登录",
-          delete: "删除", noTransactions: "暂无交易。", transactionCount: "本月共 {count} 笔交易",
-          confirmDelete: "删除所有交易、预算数据和偏好设置？此操作无法撤销。",
-          dataDeleted: "所有本地数据已删除。", transactionAdded: "交易已添加。", transactionDeleted: "交易已删除。",
-          budgetSaved: "预算已保存。", settingsSaved: "设置已保存。", switchedAccount: "账户已切换（演示）。",
-          loggedOut: "您已退出登录（演示）。", loggedIn: "您已登录（演示）。",
-          mockGroceries: "周末杂货", mockTransit: "公交月票", mockCoffee: "与朋友喝咖啡"
-        },
-        fr: {
-          dashboard: "Tableau de bord", transactions: "Transactions", budgetSetup: "Configuration du budget", achievements: "Réussites",
-          spentThisMonth: "Dépensé ce mois-ci", remainingThisMonth: "Reste ce mois-ci", monthlyBudget: "Budget mensuel",
-          recentTransactions: "Transactions récentes", viewAll: "Tout voir", budgetProgress: "Progression du budget", used: "utilisé",
-          transactionsIntro: "Ajoutez des dépenses dans une devise prise en charge. PennyWiseBT fait la conversion.",
-          description: "Description", descriptionPlaceholder: "p. ex. Épicerie", amount: "Montant", currency: "Devise",
-          addTransaction: "Ajouter la transaction", budgetIntro: "Définissez le total que vous prévoyez dépenser ce mois-ci.", saveBudget: "Enregistrer le budget",
-          achievementsIntro: "Les petites victoires créent de bonnes habitudes financières.", firstStep: "Premier pas", firstStepDesc: "Ajoutez votre première transaction.",
-          steadyTracker: "Suivi régulier", steadyTrackerDesc: "Enregistrez cinq transactions.", onBudget: "Budget respecté",
-          onBudgetDesc: "Gardez vos dépenses dans votre budget mensuel.", settings: "Paramètres", accountManagement: "Gestion du compte",
-          currentEmail: "Courriel actuel", deleteAllData: "Supprimer toutes mes données", careSettings: "Fonctions d’accessibilité",
-          careSettingsDesc: "Adaptez PennyWiseBT pour faciliter la lecture et la navigation.", fontSize: "Taille du texte", normal: "Normale",
-          large: "Grande", extraLarge: "Très grande", buttonOutline: "Contour des boutons",
-          buttonOutlineDesc: "Ajoutez un contour bleu prononcé aux boutons.", highContrast: "Mode contraste élevé",
-          highContrastDesc: "Utilisez des arrière-plans sombres et des commandes plus vives.", language: "Langue", displayLanguage: "Langue d’affichage",
-          currencySettings: "Devise", currencyDesc: "Les montants utilisent votre devise par défaut et des taux de démonstration fixes.",
-          defaultCurrency: "Devise par défaut", switchAccount: "Changer de compte", logout: "Déconnexion", login: "Connexion",
-          delete: "Supprimer", noTransactions: "Aucune transaction.", transactionCount: "{count} transactions ce mois-ci",
-          confirmDelete: "Supprimer toutes les transactions, le budget et les préférences ? Cette action est irréversible.",
-          dataDeleted: "Toutes les données locales ont été supprimées.", transactionAdded: "Transaction ajoutée.", transactionDeleted: "Transaction supprimée.",
-          budgetSaved: "Budget enregistré.", settingsSaved: "Paramètre enregistré.", switchedAccount: "Compte changé (démo).",
-          loggedOut: "Vous êtes déconnecté (démo).", loggedIn: "Vous êtes connecté (démo).",
-          mockGroceries: "Épicerie du week-end", mockTransit: "Carte de transport", mockCoffee: "Café avec un ami"
-        }
-      };
-
-      const browserLanguage = (navigator.language || "en").slice(0, 2).toLowerCase();
-      const defaultLanguage = supportedLanguages.includes(browserLanguage) ? browserLanguage : "en";
-
-      const defaultState = () => ({
-        language: defaultLanguage,
-        defaultCurrency: "CAD",
-        accessibility: { fontSize: "normal", buttonOutline: false, highContrast: false },
-        budgetCad: 2400,
-        transactions: [
-          { id: "mock-1", descriptionKey: "mockGroceries", originalAmount: 86.42, originalCurrency: "CAD", entryConvertedAmount: 86.42, entryConvertedCurrency: "CAD", createdAt: "2026-06-11T12:00:00.000Z" },
-          { id: "mock-2", descriptionKey: "mockTransit", originalAmount: 50, originalCurrency: "USD", entryConvertedAmount: 67.5, entryConvertedCurrency: "CAD", createdAt: "2026-06-09T12:00:00.000Z" },
-          { id: "mock-3", descriptionKey: "mockCoffee", originalAmount: 42, originalCurrency: "CNY", entryConvertedAmount: 7.88, entryConvertedCurrency: "CAD", createdAt: "2026-06-07T12:00:00.000Z" }
-        ]
-      });
-
-      function loadState() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (!saved) return defaultState();
-          const base = defaultState();
-          return {
-            ...base,
-            ...saved,
-            accessibility: { ...base.accessibility, ...(saved.accessibility || {}) },
-            transactions: Array.isArray(saved.transactions) ? saved.transactions : base.transactions
-          };
-        } catch {
-          return defaultState();
-        }
-      }
-
-      let state = loadState();
-      let toastTimer;
-
-      const $ = (selector) => document.querySelector(selector);
-      const $$ = (selector) => [...document.querySelectorAll(selector)];
-
-      const elements = {
-        spentTotal: $("#spentTotal"), remainingTotal: $("#remainingTotal"), budgetTotal: $("#budgetTotal"),
-        transactionCount: $("#transactionCount"), recentList: $("#recentList"), transactionList: $("#transactionList"),
-        budgetMeter: $("#budgetMeter"), budgetPercent: $("#budgetPercent"), budgetInput: $("#budgetInput"),
-        budgetCurrencyLabel: $("#budgetCurrencyLabel"), transactionCurrency: $("#transactionCurrency"),
-        settingsBackdrop: $("#settingsBackdrop"), accountMenu: $("#accountMenu"), avatarButton: $("#avatarButton"),
-        accountName: $("#accountName"), accountEmail: $("#accountEmail"), settingsAccountName: $("#settingsAccountName"),
-        settingsEmail: $("#settingsEmail"), logoutButton: $("#logoutButton"),
-        languageSelect: $("#languageSelect"), defaultCurrencySelect: $("#defaultCurrencySelect"),
-        fontSizeSelect: $("#fontSizeSelect"), buttonOutlineToggle: $("#buttonOutlineToggle"),
-        highContrastToggle: $("#highContrastToggle"), toast: $("#toast")
-      };
-
-      function t(key, replacements = {}) {
-        let value = translations[state.language]?.[key] || translations.en[key] || key;
-        Object.entries(replacements).forEach(([name, replacement]) => {
-          value = value.replaceAll("{" + name + "}", replacement);
-        });
-        return value;
-      }
-
-      function saveState() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      }
-
-      function convert(amount, fromCurrency, toCurrency) {
-        const cadValue = Number(amount) * RATES_IN_CAD[fromCurrency];
-        return cadValue / RATES_IN_CAD[toCurrency];
-      }
-
-      function formatMoney(amount, currency = state.defaultCurrency) {
-        const locale = { en: "en-CA", zh: "zh-CN", fr: "fr-CA" }[state.language];
-        return new Intl.NumberFormat(locale, {
-          style: "currency",
-          currency,
-          minimumFractionDigits: currency === "JPY" ? 0 : 2,
-          maximumFractionDigits: currency === "JPY" ? 0 : 2
-        }).format(Number(amount) || 0);
-      }
-
-      function currentTransactionAmount(transaction) {
-        return convert(transaction.originalAmount, transaction.originalCurrency, state.defaultCurrency);
-      }
-
-      function totalSpent() {
-        return state.transactions.reduce((total, transaction) => total + currentTransactionAmount(transaction), 0);
-      }
-
-      function currentBudget() {
-        return convert(state.budgetCad, "CAD", state.defaultCurrency);
-      }
-
-      function transactionDescription(transaction) {
-        return transaction.descriptionKey ? t(transaction.descriptionKey) : transaction.description;
-      }
-
-      function showToast(message) {
-        clearTimeout(toastTimer);
-        elements.toast.textContent = message;
-        elements.toast.classList.add("show");
-        toastTimer = setTimeout(() => elements.toast.classList.remove("show"), 2400);
-      }
-
-      function applyAccessibility() {
-        document.documentElement.dataset.fontSize = state.accessibility.fontSize;
-        document.body.classList.toggle("button-outlines", state.accessibility.buttonOutline);
-        document.body.classList.toggle("high-contrast", state.accessibility.highContrast);
-        elements.fontSizeSelect.value = state.accessibility.fontSize;
-        elements.buttonOutlineToggle.checked = state.accessibility.buttonOutline;
-        elements.highContrastToggle.checked = state.accessibility.highContrast;
-      }
-
-      function applyTranslations() {
-        document.documentElement.lang = state.language === "zh" ? "zh-CN" : state.language;
-        $$("[data-i18n]").forEach((element) => {
-          element.textContent = t(element.dataset.i18n);
-        });
-        $$("[data-i18n-placeholder]").forEach((element) => {
-          element.placeholder = t(element.dataset.i18nPlaceholder);
-        });
-        $("#settingsButton").setAttribute("aria-label", t("settings"));
-        $("#closeSettingsButton").setAttribute("aria-label", state.language === "fr" ? "Fermer" : state.language === "zh" ? "关闭" : "Close");
-        elements.logoutButton.textContent = t("logout");
-        elements.languageSelect.value = state.language;
-      }
-
-      function renderTransactions() {
-        const sorted = [...state.transactions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        elements.transactionList.innerHTML = "";
-        elements.recentList.innerHTML = "";
-
-        if (!sorted.length) {
-          const empty = document.createElement("li");
-          empty.className = "empty-state";
-          empty.textContent = t("noTransactions");
-          elements.transactionList.append(empty);
-          elements.recentList.append(empty.cloneNode(true));
-          return;
-        }
-
-        sorted.forEach((transaction) => {
-          const item = document.createElement("li");
-          item.className = "transaction-item";
-
-          const copy = document.createElement("div");
-          const title = document.createElement("p");
-          title.className = "transaction-title";
-          title.textContent = transactionDescription(transaction);
-          const meta = document.createElement("p");
-          meta.className = "transaction-meta";
-          meta.textContent = new Intl.DateTimeFormat(
-            { en: "en-CA", zh: "zh-CN", fr: "fr-CA" }[state.language],
-            { dateStyle: "medium" }
-          ).format(new Date(transaction.createdAt));
-          copy.append(title, meta);
-
-          const amount = document.createElement("div");
-          amount.className = "transaction-amount";
-          amount.textContent = formatMoney(currentTransactionAmount(transaction));
-          const original = document.createElement("span");
-          original.className = "transaction-original";
-          original.textContent = formatMoney(transaction.originalAmount, transaction.originalCurrency);
-          amount.append(original);
-
-          const deleteButton = document.createElement("button");
-          deleteButton.type = "button";
-          deleteButton.className = "delete-button";
-          deleteButton.dataset.transactionId = transaction.id;
-          deleteButton.textContent = t("delete");
-          item.append(copy, amount, deleteButton);
-          elements.transactionList.append(item);
-        });
-
-        sorted.slice(0, 3).forEach((transaction) => {
-          const item = document.createElement("li");
-          item.className = "recent-item";
-          const copy = document.createElement("div");
-          const title = document.createElement("p");
-          title.className = "transaction-title";
-          title.textContent = transactionDescription(transaction);
-          const original = document.createElement("p");
-          original.className = "transaction-meta";
-          original.textContent = formatMoney(transaction.originalAmount, transaction.originalCurrency);
-          copy.append(title, original);
-          const amount = document.createElement("span");
-          amount.className = "transaction-amount";
-          amount.textContent = formatMoney(currentTransactionAmount(transaction));
-          item.append(copy, amount);
-          elements.recentList.append(item);
-        });
-      }
-
-      function renderDashboard() {
-        const spent = totalSpent();
-        const budget = currentBudget();
-        const remaining = budget - spent;
-        const percent = budget > 0 ? (spent / budget) * 100 : 0;
-
-        elements.spentTotal.textContent = formatMoney(spent);
-        elements.remainingTotal.textContent = formatMoney(remaining);
-        elements.remainingTotal.classList.toggle("negative", remaining < 0);
-        elements.budgetTotal.textContent = formatMoney(budget);
-        elements.transactionCount.textContent = t("transactionCount", { count: state.transactions.length });
-        elements.budgetMeter.style.width = Math.min(percent, 100) + "%";
-        elements.budgetMeter.classList.toggle("over", percent > 100);
-        elements.budgetPercent.textContent = Math.round(percent) + "%";
-
-        $("#firstStepAchievement").classList.toggle("locked", state.transactions.length < 1);
-        $("#trackerAchievement").classList.toggle("locked", state.transactions.length < 5);
-        $("#onBudgetAchievement").classList.toggle("locked", budget <= 0 || spent > budget);
-      }
-
-      function renderAccount() {
-        const demoLabels = { en: "Demo Account", zh: "演示账户", fr: "Compte démo" };
-        const accountName = authenticatedUser.isDemo
-          ? demoLabels[state.language]
-          : authenticatedUser.name || authenticatedUser.email;
-        elements.accountName.textContent = accountName;
-        elements.settingsAccountName.textContent = accountName;
-        elements.accountEmail.textContent = authenticatedUser.email;
-        elements.settingsEmail.textContent = authenticatedUser.email;
-        elements.avatarButton.textContent = authenticatedUser.isDemo
-          ? "D"
-          : (authenticatedUser.name || authenticatedUser.email).trim().charAt(0).toUpperCase();
-        elements.avatarButton.setAttribute("aria-label", accountName);
-        elements.logoutButton.textContent = t("logout");
-      }
-
-      function renderCurrencyControls() {
-        elements.defaultCurrencySelect.value = state.defaultCurrency;
-        elements.transactionCurrency.value = state.defaultCurrency;
-        elements.budgetCurrencyLabel.textContent = state.defaultCurrency;
-        elements.budgetInput.value = currentBudget().toFixed(state.defaultCurrency === "JPY" ? 0 : 2);
-      }
-
-      function renderAll() {
-        applyAccessibility();
-        applyTranslations();
-        renderAccount();
-        renderCurrencyControls();
-        renderTransactions();
-        renderDashboard();
-      }
-
-      function showPage(pageName) {
-        $$(".page").forEach((page) => page.classList.toggle("active", page.id === pageName + "Page"));
-        $$(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.page === pageName));
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
-      function openSettings() {
-        elements.settingsBackdrop.hidden = false;
-        document.body.style.overflow = "hidden";
-        $("#closeSettingsButton").focus();
-      }
-
-      function closeSettings() {
-        elements.settingsBackdrop.hidden = true;
-        document.body.style.overflow = "";
-        $("#settingsButton").focus();
-      }
-
-      $$(".nav-button").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
-      $$("[data-go-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.goPage)));
-
-      $("#transactionForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-        const description = $("#descriptionInput").value.trim();
-        const originalAmount = Number($("#amountInput").value);
-        const originalCurrency = elements.transactionCurrency.value;
-        if (!description || !Number.isFinite(originalAmount) || originalAmount <= 0) return;
-
-        state.transactions.push({
-          id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-          description,
-          originalAmount,
-          originalCurrency,
-          entryConvertedAmount: convert(originalAmount, originalCurrency, state.defaultCurrency),
-          entryConvertedCurrency: state.defaultCurrency,
-          createdAt: new Date().toISOString()
-        });
-        saveState();
-        event.currentTarget.reset();
-        elements.transactionCurrency.value = state.defaultCurrency;
-        renderTransactions();
-        renderDashboard();
-        showToast(t("transactionAdded"));
-      });
-
-      elements.transactionList.addEventListener("click", (event) => {
-        const button = event.target.closest("[data-transaction-id]");
-        if (!button) return;
-        state.transactions = state.transactions.filter((transaction) => transaction.id !== button.dataset.transactionId);
-        saveState();
-        renderTransactions();
-        renderDashboard();
-        showToast(t("transactionDeleted"));
-      });
-
-      $("#budgetForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-        const enteredBudget = Number(elements.budgetInput.value);
-        if (!Number.isFinite(enteredBudget) || enteredBudget < 0) return;
-        state.budgetCad = convert(enteredBudget, state.defaultCurrency, "CAD");
-        saveState();
-        renderDashboard();
-        showToast(t("budgetSaved"));
-      });
-
-      $("#settingsButton").addEventListener("click", openSettings);
-      $("#closeSettingsButton").addEventListener("click", closeSettings);
-      elements.settingsBackdrop.addEventListener("click", (event) => {
-        if (event.target === elements.settingsBackdrop) closeSettings();
-      });
-
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          if (!elements.settingsBackdrop.hidden) closeSettings();
-          elements.accountMenu.hidden = true;
-          elements.avatarButton.setAttribute("aria-expanded", "false");
-        }
-      });
-
-      elements.avatarButton.addEventListener("click", () => {
-        elements.accountMenu.hidden = !elements.accountMenu.hidden;
-        elements.avatarButton.setAttribute("aria-expanded", String(!elements.accountMenu.hidden));
-      });
-
-      document.addEventListener("click", (event) => {
-        if (!event.target.closest(".top-actions")) {
-          elements.accountMenu.hidden = true;
-          elements.avatarButton.setAttribute("aria-expanded", "false");
-        }
-      });
-
-      $("#switchAccountButton").addEventListener("click", () => {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        window.location.replace("login.html");
-      });
-
-      elements.logoutButton.addEventListener("click", () => {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        window.location.replace("login.html");
-      });
-
-      elements.fontSizeSelect.addEventListener("change", () => {
-        state.accessibility.fontSize = elements.fontSizeSelect.value;
-        saveState();
-        applyAccessibility();
-        showToast(t("settingsSaved"));
-      });
-
-      elements.buttonOutlineToggle.addEventListener("change", () => {
-        state.accessibility.buttonOutline = elements.buttonOutlineToggle.checked;
-        saveState();
-        applyAccessibility();
-        showToast(t("settingsSaved"));
-      });
-
-      elements.highContrastToggle.addEventListener("change", () => {
-        state.accessibility.highContrast = elements.highContrastToggle.checked;
-        saveState();
-        applyAccessibility();
-        showToast(t("settingsSaved"));
-      });
-
-      elements.languageSelect.addEventListener("change", () => {
-        state.language = elements.languageSelect.value;
-        saveState();
-        renderAll();
-        showToast(t("settingsSaved"));
-      });
-
-      elements.defaultCurrencySelect.addEventListener("change", () => {
-        state.defaultCurrency = elements.defaultCurrencySelect.value;
-        saveState();
-        renderCurrencyControls();
-        renderTransactions();
-        renderDashboard();
-        showToast(t("settingsSaved"));
-      });
-
-      $("#deleteDataButton").addEventListener("click", () => {
-        if (!window.confirm(t("confirmDelete"))) return;
-        const language = state.language;
-        state = defaultState();
-        state.language = language;
-        state.transactions = [];
-        state.budgetCad = 0;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        closeSettings();
-        renderAll();
-        showToast(t("dataDeleted"));
-      });
-
-      renderAll();
-    })();
+  (() => {
+    "use strict";
+    const AUTH="budgetTrackerUser",LEGACY="pennyWiseBT_v2",R={CAD:1,USD:1.35,CNY:1.35/7.2,JPY:1.35/150};
+    const C=[["food","🍔","Food","餐饮","Alimentation"],["transport","🚗","Transport","交通","Transport"],["shopping","🛒","Shopping","购物","Achats"],["housing","🏠","Housing","住房","Logement"],["entertainment","📱","Entertainment","娱乐","Divertissement"],["medical","💊","Medical","医疗","Santé"],["education","📚","Education","教育","Éducation"],["other","💰","Other","其他","Autre"]];
+    const T={
+      en:{dashboard:"Dashboard",addExpense:"Add Expense",history:"History",budgetSetup:"Budget Setup",achievements:"Achievements",spentThisMonth:"Spent this month",remainingThisMonth:"Remaining this month",monthlyBudget:"Monthly budget",recentTransactions:"Recent transactions",viewAll:"View all",budgetProgress:"Budget progress",used:"used",categoryOverview:"Category budget overview",addIntro:"Record an expense or income in any supported currency.",type:"Type",expense:"Expense",income:"Income",category:"Category",description:"Description",descriptionPlaceholder:"e.g. Groceries",amount:"Amount",currency:"Currency",date:"Date",saveRecord:"Save record",historyIntro:"Filter, sort, and manage all records.",categoryFilter:"Category",typeFilter:"Type",dateRange:"Date range",sortBy:"Sort by",all:"All",thisMonth:"This month",thisWeek:"This week",custom:"Custom",allTime:"All time",newest:"Newest first",oldest:"Oldest first",amountHigh:"Amount high to low",amountLow:"Amount low to high",resetFilters:"Reset filters",startDate:"Start date",endDate:"End date",budgetIntro:"Set your total and category monthly limits.",saveBudget:"Save budget",categoryBudgets:"Category budgets",categoryBudgetsIntro:"Set a monthly limit for each category.",saveLimits:"Save limits",limit:"Limit",spent:"Spent",noLimit:"No limit",achievementsIntro:"Small wins make strong money habits.",firstStep:"First step",firstStepDesc:"Add your first record.",steadyTracker:"Steady tracker",steadyTrackerDesc:"Record five transactions.",onBudget:"On budget",onBudgetDesc:"Keep expenses within your monthly budget.",settings:"Settings",accountManagement:"Account Management",currentEmail:"Current email",deleteAllData:"Delete all my data",careSettings:"Accessibility Features",careSettingsDesc:"Adjust PennyWiseBT for easier reading and navigation.",fontSize:"Font size",normal:"Normal",large:"Large",extraLarge:"Extra Large",buttonOutline:"Button outline",highContrast:"High contrast mode",language:"Language",displayLanguage:"Display language",currencySettings:"Currency",currencyDesc:"Amounts use fixed demo exchange rates.",defaultCurrency:"Default currency",switchAccount:"Switch account",logout:"Logout",delete:"Delete",noRecords:"No matching records.",recordsFound:"{count} records",recordAdded:"Record added successfully.",recordDeleted:"Record deleted.",budgetSaved:"Budget saved.",limitsSaved:"Category limits saved.",settingsSaved:"Setting saved.",confirmDelete:"Delete all budget data for this account?",dataDeleted:"All account data was deleted.",demoAccount:"Demo Account",warning:"Over limit"},
+      zh:{dashboard:"仪表板",addExpense:"添加记录",history:"历史记录",budgetSetup:"预算设置",achievements:"成就",spentThisMonth:"本月支出",remainingThisMonth:"本月剩余",monthlyBudget:"月度总预算",recentTransactions:"最近记录",viewAll:"查看全部",budgetProgress:"总预算进度",used:"已使用",categoryOverview:"分类预算速览",addIntro:"使用支持的货币记录支出或收入。",type:"类型",expense:"支出",income:"收入",category:"分类",description:"描述",descriptionPlaceholder:"例如：购买杂货",amount:"金额",currency:"货币",date:"日期",saveRecord:"保存记录",historyIntro:"筛选、排序和管理所有记录。",categoryFilter:"分类筛选",typeFilter:"类型筛选",dateRange:"日期范围",sortBy:"排序",all:"全部",thisMonth:"本月",thisWeek:"本周",custom:"自定义",allTime:"全部时间",newest:"时间最新优先",oldest:"时间最早优先",amountHigh:"金额从高到低",amountLow:"金额从低到高",resetFilters:"重置筛选",startDate:"开始日期",endDate:"结束日期",budgetIntro:"设置总预算和各分类月度限额。",saveBudget:"保存预算",categoryBudgets:"分类预算管理",categoryBudgetsIntro:"为每个支出分类设置月度限额。",saveLimits:"保存限额",limit:"限额",spent:"已花销",noLimit:"未设置限额",achievementsIntro:"小进步带来稳健的理财习惯。",firstStep:"第一步",firstStepDesc:"添加第一条记录。",steadyTracker:"坚持记录",steadyTrackerDesc:"记录五笔交易。",onBudget:"控制预算",onBudgetDesc:"将支出保持在月度预算内。",settings:"设置",accountManagement:"账户管理",currentEmail:"当前邮箱",deleteAllData:"删除我的所有数据",careSettings:"无障碍设置",careSettingsDesc:"调整 PennyWiseBT 以便更轻松地阅读和操作。",fontSize:"字体大小",normal:"正常",large:"大",extraLarge:"特大",buttonOutline:"按钮轮廓",highContrast:"高对比度模式",language:"语言",displayLanguage:"显示语言",currencySettings:"货币",currencyDesc:"金额使用固定演示汇率。",defaultCurrency:"默认货币",switchAccount:"切换账户",logout:"退出登录",delete:"删除",noRecords:"没有符合筛选条件的记录。",recordsFound:"共 {count} 条记录",recordAdded:"记录添加成功。",recordDeleted:"记录已删除。",budgetSaved:"预算已保存。",limitsSaved:"分类限额已保存。",settingsSaved:"设置已保存。",confirmDelete:"删除此账户的所有预算数据？",dataDeleted:"账户数据已全部删除。",demoAccount:"演示账户",warning:"已超限"},
+      fr:{dashboard:"Tableau de bord",addExpense:"Ajouter",history:"Historique",budgetSetup:"Budget",achievements:"Réussites",spentThisMonth:"Dépenses du mois",remainingThisMonth:"Reste ce mois-ci",monthlyBudget:"Budget mensuel",recentTransactions:"Transactions récentes",viewAll:"Tout voir",budgetProgress:"Progression du budget",used:"utilisé",categoryOverview:"Aperçu des catégories",addIntro:"Enregistrez une dépense ou un revenu.",type:"Type",expense:"Dépense",income:"Revenu",category:"Catégorie",description:"Description",descriptionPlaceholder:"p. ex. Épicerie",amount:"Montant",currency:"Devise",date:"Date",saveRecord:"Enregistrer",historyIntro:"Filtrez, triez et gérez tous les enregistrements.",categoryFilter:"Catégorie",typeFilter:"Type",dateRange:"Période",sortBy:"Trier",all:"Tous",thisMonth:"Ce mois-ci",thisWeek:"Cette semaine",custom:"Personnalisée",allTime:"Toute la période",newest:"Plus récents",oldest:"Plus anciens",amountHigh:"Montant décroissant",amountLow:"Montant croissant",resetFilters:"Réinitialiser",startDate:"Date de début",endDate:"Date de fin",budgetIntro:"Définissez le budget total et les limites par catégorie.",saveBudget:"Enregistrer le budget",categoryBudgets:"Budgets par catégorie",categoryBudgetsIntro:"Définissez une limite mensuelle par catégorie.",saveLimits:"Enregistrer les limites",limit:"Limite",spent:"Dépensé",noLimit:"Aucune limite",achievementsIntro:"Les petites victoires créent de bonnes habitudes.",firstStep:"Premier pas",firstStepDesc:"Ajoutez votre premier enregistrement.",steadyTracker:"Suivi régulier",steadyTrackerDesc:"Enregistrez cinq transactions.",onBudget:"Budget respecté",onBudgetDesc:"Gardez les dépenses dans le budget.",settings:"Paramètres",accountManagement:"Gestion du compte",currentEmail:"Courriel actuel",deleteAllData:"Supprimer toutes mes données",careSettings:"Accessibilité",careSettingsDesc:"Adaptez PennyWiseBT pour faciliter la lecture.",fontSize:"Taille du texte",normal:"Normale",large:"Grande",extraLarge:"Très grande",buttonOutline:"Contour des boutons",highContrast:"Contraste élevé",language:"Langue",displayLanguage:"Langue d’affichage",currencySettings:"Devise",currencyDesc:"Taux de démonstration fixes.",defaultCurrency:"Devise par défaut",switchAccount:"Changer de compte",logout:"Déconnexion",delete:"Supprimer",noRecords:"Aucun enregistrement correspondant.",recordsFound:"{count} enregistrements",recordAdded:"Enregistrement ajouté.",recordDeleted:"Enregistrement supprimé.",budgetSaved:"Budget enregistré.",limitsSaved:"Limites enregistrées.",settingsSaved:"Paramètre enregistré.",confirmDelete:"Supprimer toutes les données de ce compte ?",dataDeleted:"Données du compte supprimées.",demoAccount:"Compte démo",warning:"Limite dépassée"}
+    };
+    const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+    let user;try{user=JSON.parse(localStorage.getItem(AUTH));}catch(e){}if(!user||!user.uid){location.replace("login.html");return}
+    const KEY="pennyWiseBT_data_"+user.uid,lang0=["en","zh","fr"].includes((navigator.language||"en").slice(0,2))?(navigator.language||"en").slice(0,2):"en";
+    const iso=(n=0)=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+    const fresh=()=>({language:lang0,defaultCurrency:"CAD",accessibility:{fontSize:"normal",buttonOutline:false,highContrast:false},budgetCad:2400,categoryLimitsCad:Object.fromEntries(C.map(c=>[c[0],0])),transactions:[
+      {id:"m1",description:"Weekend groceries",type:"outcome",category:"food",originalAmount:86.42,originalCurrency:"CAD",date:iso(-3),createdAt:new Date().toISOString()},
+      {id:"m2",description:"Transit pass",type:"outcome",category:"transport",originalAmount:50,originalCurrency:"USD",date:iso(-5),createdAt:new Date(Date.now()-1).toISOString()},
+      {id:"m3",description:"Freelance payment",type:"income",category:"other",originalAmount:300,originalCurrency:"CAD",date:iso(-7),createdAt:new Date(Date.now()-2).toISOString()}]});
+    const tx=x=>({id:x.id||String(Date.now()+Math.random()),description:x.description||"Record",type:x.type==="income"?"income":"outcome",category:C.some(c=>c[0]===x.category)?x.category:"other",originalAmount:Number(x.originalAmount||x.entryConvertedAmount||0),originalCurrency:x.originalCurrency||x.entryConvertedCurrency||"CAD",date:x.date||String(x.createdAt||new Date().toISOString()).slice(0,10),createdAt:x.createdAt||new Date().toISOString()});
+    const norm=x=>{const b=fresh();return{...b,...x,accessibility:{...b.accessibility,...(x.accessibility||{})},categoryLimitsCad:{...b.categoryLimitsCad,...(x.categoryLimitsCad||{})},transactions:Array.isArray(x.transactions)?x.transactions.map(tx):b.transactions}};
+    function load(){try{const a=JSON.parse(localStorage.getItem(KEY));if(a)return norm(a);const old=JSON.parse(localStorage.getItem(LEGACY));if(old){const m=norm(old);localStorage.setItem(KEY,JSON.stringify(m));return m}}catch(e){}return fresh()}
+    let state=load(),kind="outcome",timer;const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+    const tr=(k,r={})=>{let v=T[state.language]?.[k]||T.en[k]||k;Object.entries(r).forEach(([a,b])=>v=v.replaceAll("{"+a+"}",b));return v};
+    const cat=id=>C.find(c=>c[0]===id)||C.at(-1),catName=id=>{const c=cat(id);return c[1]+" "+c[{en:2,zh:3,fr:4}[state.language]]};
+    const conv=(n,a,b)=>Number(n)*R[a]/R[b],value=x=>conv(x.originalAmount,x.originalCurrency,state.defaultCurrency);
+    const money=(n,c=state.defaultCurrency)=>new Intl.NumberFormat({en:"en-CA",zh:"zh-CN",fr:"fr-CA"}[state.language],{style:"currency",currency:c,maximumFractionDigits:c==="JPY"?0:2}).format(Number(n)||0);
+    const month=d=>{const x=new Date(d+"T12:00:00"),n=new Date();return x.getMonth()===n.getMonth()&&x.getFullYear()===n.getFullYear()},outcomes=()=>state.transactions.filter(x=>x.type==="outcome"&&month(x.date)),spent=()=>outcomes().reduce((s,x)=>s+value(x),0),budget=()=>conv(state.budgetCad,"CAD",state.defaultCurrency),catSpent=id=>outcomes().filter(x=>x.category===id).reduce((s,x)=>s+value(x),0),catLimit=id=>conv(state.categoryLimitsCad[id]||0,"CAD",state.defaultCurrency);
+    const esc=v=>{const d=document.createElement("div");d.textContent=v;return d.innerHTML},empty=()=>{const n=document.createElement("li");n.className="empty-state";n.textContent=tr("noRecords");return n};
+    function toast(v){clearTimeout(timer);$("#toast").textContent=v;$("#toast").classList.add("show");timer=setTimeout(()=>$("#toast").classList.remove("show"),2200)}
+    function categories(){[[$("#categoryInput"),false],[$("#filterCategory"),true]].forEach(([el,all])=>{const val=el.value;el.innerHTML=all?'<option value="all">'+tr("all")+"</option>":"";C.forEach(c=>el.add(new Option(catName(c[0]),c[0])));if([...el.options].some(o=>o.value===val))el.value=val})}
+    function i18n(){document.documentElement.lang=state.language==="zh"?"zh-CN":state.language;$$("[data-i18n]").forEach(e=>e.textContent=tr(e.dataset.i18n));$$("[data-i18n-placeholder]").forEach(e=>e.placeholder=tr(e.dataset.i18nPlaceholder));$("#languageSelect").value=state.language;categories()}
+    function access(){document.documentElement.dataset.fontSize=state.accessibility.fontSize;document.body.classList.toggle("button-outlines",state.accessibility.buttonOutline);document.body.classList.toggle("high-contrast",state.accessibility.highContrast);$("#fontSizeSelect").value=state.accessibility.fontSize;$("#buttonOutlineToggle").checked=state.accessibility.buttonOutline;$("#highContrastToggle").checked=state.accessibility.highContrast}
+    function account(){const n=user.isDemo?tr("demoAccount"):(user.name||user.email);$("#accountName").textContent=n;$("#accountEmail").textContent=user.email;$("#settingsAccountName").textContent=n;$("#settingsEmail").textContent=user.email;$("#avatarButton").textContent=user.isDemo?"D":n[0].toUpperCase()}
+    function node(x,del=false){const li=document.createElement("li");li.className=del?"history-item":"recent-item";const info=document.createElement("div");info.innerHTML='<p class="transaction-title">'+esc(catName(x.category))+" · "+esc(x.description)+'</p><p class="transaction-meta">'+new Intl.DateTimeFormat({en:"en-CA",zh:"zh-CN",fr:"fr-CA"}[state.language],{dateStyle:"medium"}).format(new Date(x.date+"T12:00:00"))+"</p>";const a=document.createElement("div");a.className="transaction-amount "+x.type;a.textContent=(x.type==="income"?"+":"-")+money(value(x));const o=document.createElement("span");o.className="transaction-original";o.textContent=money(x.originalAmount,x.originalCurrency);a.append(o);li.append(info,a);if(del){const b=document.createElement("button");b.className="delete-button";b.dataset.deleteId=x.id;b.textContent=tr("delete");li.append(b)}return li}
+    function dashboard(){const s=spent(),b=budget(),left=b-s,p=b?s/b*100:0;$("#spentTotal").textContent=money(s);$("#remainingTotal").textContent=money(left);$("#remainingTotal").classList.toggle("negative",left<0);$("#budgetTotal").textContent=money(b);$("#transactionCount").textContent=tr("recordsFound",{count:state.transactions.length});$("#budgetMeter").style.width=Math.min(p,100)+"%";$("#budgetMeter").classList.toggle("over",p>100);$("#budgetPercent").textContent=Math.round(p)+"%";const recent=[...state.transactions].sort((a,z)=>z.date.localeCompare(a.date)||z.createdAt.localeCompare(a.createdAt)).slice(0,3);$("#recentList").replaceChildren(...(recent.length?recent.map(x=>node(x)): [empty()]));const top=C.map(c=>({id:c[0],s:catSpent(c[0]),l:catLimit(c[0])})).filter(x=>x.s||x.l).sort((a,z)=>z.s-a.s).slice(0,5),box=$("#categoryPreview");box.innerHTML="";if(!top.length)box.append(empty());top.forEach(x=>{const p=x.l?x.s/x.l*100:0,d=document.createElement("div");d.innerHTML='<div class="preview-row-head"><strong>'+esc(catName(x.id))+"</strong><span>"+money(x.s)+" / "+(x.l?money(x.l):tr("noLimit"))+'</span></div><div class="mini-meter"><span class="'+(p>100?"over":"")+'" style="width:'+Math.min(p,100)+'%"></span></div>';box.append(d)});$("#firstStepAchievement").classList.toggle("locked",!state.transactions.length);$("#trackerAchievement").classList.toggle("locked",state.transactions.length<5);$("#onBudgetAchievement").classList.toggle("locked",!b||s>b)}
+    function filtered(){let l=[...state.transactions],c=$("#filterCategory").value,k=$("#filterType").value,r=$("#filterRange").value;if(c!=="all")l=l.filter(x=>x.category===c);if(k!=="all")l=l.filter(x=>x.type===k);const n=new Date(),w=new Date(n);w.setDate(n.getDate()-((n.getDay()+6)%7));w.setHours(0,0,0,0);if(r==="month")l=l.filter(x=>month(x.date));if(r==="week")l=l.filter(x=>new Date(x.date+"T12:00:00")>=w);if(r==="custom"){const a=$("#customStart").value,z=$("#customEnd").value;if(a)l=l.filter(x=>x.date>=a);if(z)l=l.filter(x=>x.date<=z)}const q=$("#sortHistory").value;l.sort((a,z)=>q==="oldest"?a.date.localeCompare(z.date):q==="high"?value(z)-value(a):q==="low"?value(a)-value(z):z.date.localeCompare(a.date)||z.createdAt.localeCompare(a.createdAt));return l}
+    function history(){const l=filtered();$("#historyList").replaceChildren(...(l.length?l.map(x=>node(x,true)):[empty()]));$("#resultCount").textContent=tr("recordsFound",{count:l.length});$("#customDateRow").hidden=$("#filterRange").value!=="custom"}
+    function budgets(){const c=state.defaultCurrency;$("#budgetCurrencyLabel").textContent=c;$("#budgetInput").value=budget().toFixed(c==="JPY"?0:2);const box=$("#categoryBudgetList");box.innerHTML="";C.forEach(x=>{const s=catSpent(x[0]),l=catLimit(x[0]),p=l?s/l*100:0,d=document.createElement("div");d.className="category-budget-row"+(l&&s>l?" over":"");d.innerHTML='<div><div class="category-name">'+esc(catName(x[0]))+(l&&s>l?' <span class="warning">⚠️ '+tr("warning")+"</span>":"")+'</div><div class="category-spend">'+tr("spent")+": "+money(s)+'</div></div><div class="field"><label>'+tr("limit")+" ("+c+')</label><input data-limit="'+x[0]+'" type="number" min="0" step=".01" value="'+l.toFixed(c==="JPY"?0:2)+'"></div><div class="category-progress"><div class="meter-row"><span>'+(l?Math.round(p)+"%":tr("noLimit"))+"</span><span>"+(l?money(l):"")+'</span></div><div class="mini-meter"><span class="'+(p>100?"over":"")+'" style="width:'+Math.min(p,100)+'%"></span></div></div>';box.append(d)})}
+    function render(){access();i18n();account();$("#defaultCurrencySelect").value=state.defaultCurrency;$("#transactionCurrency").value=state.defaultCurrency;dashboard();history();budgets()}
+    function page(n){$$(".page").forEach(x=>x.classList.toggle("active",x.id===n+"Page"));$$(".nav-button").forEach(x=>x.classList.toggle("active",x.dataset.page===n));if(n==="history")history();if(n==="budget")budgets();scrollTo({top:0,behavior:"smooth"})}
+    $$("[data-page]").forEach(b=>b.onclick=()=>page(b.dataset.page));$$("[data-go-page]").forEach(b=>b.onclick=()=>page(b.dataset.goPage));$$(".type-button").forEach(b=>b.onclick=()=>{kind=b.dataset.type;$$(".type-button").forEach(x=>x.classList.toggle("active",x===b))});$("#dateInput").value=iso();
+    $("#transactionForm").onsubmit=e=>{e.preventDefault();state.transactions.push({id:crypto.randomUUID(),type:kind,category:$("#categoryInput").value,description:$("#descriptionInput").value.trim(),originalAmount:+$("#amountInput").value,originalCurrency:$("#transactionCurrency").value,date:$("#dateInput").value,createdAt:new Date().toISOString()});save();e.target.reset();kind="outcome";$$(".type-button").forEach(b=>b.classList.toggle("active",b.dataset.type==="outcome"));$("#dateInput").value=iso();render();toast(tr("recordAdded"))};
+    $("#historyList").onclick=e=>{const b=e.target.closest("[data-delete-id]");if(!b)return;state.transactions=state.transactions.filter(x=>x.id!==b.dataset.deleteId);save();render();toast(tr("recordDeleted"))};["filterCategory","filterType","filterRange","sortHistory","customStart","customEnd"].forEach(id=>$("#"+id).onchange=history);$("#resetFilters").onclick=()=>{$("#filterCategory").value="all";$("#filterType").value="all";$("#filterRange").value="month";$("#sortHistory").value="newest";$("#customStart").value="";$("#customEnd").value="";history()};
+    $("#budgetForm").onsubmit=e=>{e.preventDefault();state.budgetCad=conv(+$("#budgetInput").value,state.defaultCurrency,"CAD");save();render();toast(tr("budgetSaved"))};$("#saveCategoryBudgets").onclick=()=>{$$("[data-limit]").forEach(i=>state.categoryLimitsCad[i.dataset.limit]=conv(+i.value||0,state.defaultCurrency,"CAD"));save();render();toast(tr("limitsSaved"))};
+    const close=()=>{$("#settingsBackdrop").hidden=true;document.body.style.overflow=""};$("#settingsButton").onclick=()=>{$("#settingsBackdrop").hidden=false;document.body.style.overflow="hidden"};$("#closeSettingsButton").onclick=close;$("#settingsBackdrop").onclick=e=>{if(e.target===$("#settingsBackdrop"))close()};$("#avatarButton").onclick=()=>$("#accountMenu").hidden=!$("#accountMenu").hidden;document.addEventListener("click",e=>{if(!e.target.closest(".top-actions"))$("#accountMenu").hidden=true});$("#switchAccountButton").onclick=$("#logoutButton").onclick=()=>{localStorage.removeItem(AUTH);location.replace("login.html")};
+    $("#fontSizeSelect").onchange=e=>{state.accessibility.fontSize=e.target.value;save();access()};$("#buttonOutlineToggle").onchange=e=>{state.accessibility.buttonOutline=e.target.checked;save();access()};$("#highContrastToggle").onchange=e=>{state.accessibility.highContrast=e.target.checked;save();access()};$("#languageSelect").onchange=e=>{state.language=e.target.value;save();render()};$("#defaultCurrencySelect").onchange=e=>{state.defaultCurrency=e.target.value;save();render()};$("#deleteDataButton").onclick=()=>{if(!confirm(tr("confirmDelete")))return;state=fresh();state.transactions=[];state.budgetCad=0;save();close();render();toast(tr("dataDeleted"))};render();
+  })();
   </script>
 </body>
 </html>
