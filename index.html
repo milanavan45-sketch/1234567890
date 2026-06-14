@@ -1,406 +1,1153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Tracker App</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* 用户菜单样式 */
-        .user-menu-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-            position: relative;
-        }
-        
-        .user-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .user-avatar img {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .user-dropdown {
-            position: absolute;
-            top: 55px;
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            min-width: 220px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-        
-        .user-dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        .dropdown-item {
-            padding: 12px 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-        
-        .dropdown-item:hover {
-            background: #f8f9ff;
-        }
-        
-        .dropdown-item.logout {
-            color: #f44336;
-        }
-        
-        .user-info-text {
-            padding: 12px 18px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .user-email {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-            word-break: break-all;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PennyWiseBT personal budget tracker">
+  <title>PennyWiseBT</title>
+  <style>
+    :root {
+      --bg: #f6f5f0;
+      --surface: #ffffff;
+      --surface-soft: #eef8f2;
+      --text: #17221c;
+      --muted: #66736b;
+      --border: #dce5df;
+      --brand: #176b45;
+      --brand-dark: #0d4d31;
+      --accent: #f4b740;
+      --danger: #c43d3d;
+      --shadow: 0 12px 30px rgba(22, 56, 38, 0.08);
+      --radius: 20px;
+      --focus: #005fcc;
+      font-size: 16px;
+    }
+
+    :root[data-font-size="large"] { font-size: 18px; }
+    :root[data-font-size="xlarge"] { font-size: 21px; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(244, 183, 64, 0.13), transparent 27rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      transition: color .2s, background .2s;
+    }
+
+    body.high-contrast {
+      --bg: #090b0a;
+      --surface: #111512;
+      --surface-soft: #18241b;
+      --text: #fbfffc;
+      --muted: #d5ded8;
+      --border: #f2fff6;
+      --brand: #00e682;
+      --brand-dark: #00bd6b;
+      --accent: #ffd400;
+      --danger: #ff5d5d;
+      --shadow: none;
+      background: var(--bg);
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      transition: transform .15s, background .2s, color .2s, border-color .2s;
+    }
+
+    button:hover { transform: translateY(-1px); }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    body.button-outlines button {
+      outline: 3px solid #005fcc;
+      outline-offset: 2px;
+    }
+
+    body.button-outlines button:focus-visible {
+      outline: 5px double #005fcc;
+      outline-offset: 3px;
+    }
+
+    .app-shell {
+      width: min(1200px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 18px 0 48px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.28rem;
+      font-weight: 850;
+      letter-spacing: -.03em;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      background: var(--brand);
+      box-shadow: var(--shadow);
+      font-size: 1.25rem;
+    }
+
+    .top-actions {
+      grid-column: 3;
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      position: relative;
+    }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text);
+      background: var(--surface);
+      box-shadow: 0 5px 16px rgba(22, 56, 38, .06);
+      font-size: 1.15rem;
+    }
+
+    .avatar-button {
+      color: #fff;
+      background: var(--brand);
+      border-color: transparent;
+    }
+
+    .account-menu {
+      position: absolute;
+      top: 52px;
+      right: 52px;
+      z-index: 20;
+      width: 230px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .account-menu[hidden] { display: none; }
+    .account-email { margin: 4px 8px 10px; color: var(--muted); font-size: .84rem; overflow-wrap: anywhere; }
+    .account-menu button { width: 100%; padding: 10px 12px; border-radius: 10px; text-align: left; color: var(--text); background: transparent; }
+    .account-menu button:hover { background: var(--surface-soft); }
+
+    .main-nav {
+      display: flex;
+      width: fit-content;
+      max-width: 600px;
+      margin: 26px auto;
+      padding: 5px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 6px 18px rgba(22, 56, 38, .05);
+      overflow-x: auto;
+    }
+
+    .high-contrast .main-nav { background: var(--surface); }
+
+    .nav-button {
+      flex: 0 0 auto;
+      padding: 10px 15px;
+      border-radius: 11px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .nav-button.active {
+      color: #fff;
+      background: var(--brand);
+    }
+
+    .page { display: none; }
+    .page.active { display: block; animation: fade-in .2s ease; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } }
+
+    .summary-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-stat {
+      min-width: 0;
+      padding: clamp(22px, 5vw, 44px);
+      background: var(--surface);
+    }
+
+    .summary-stat.remaining { background: var(--surface-soft); }
+    .eyebrow { margin: 0 0 8px; color: var(--muted); font-size: .83rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .money-hero { margin: 0; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; letter-spacing: -.06em; overflow-wrap: anywhere; }
+    .money-hero.negative { color: var(--danger); }
+    .summary-note { margin: 12px 0 0; color: var(--muted); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -.04em; }
+    h2 { margin: 0; font-size: 1.15rem; letter-spacing: -.02em; }
+    h3 { margin: 0; font-size: 1rem; }
+    .lede { margin: 7px 0 24px; color: var(--muted); }
+
+    .recent-list, .transaction-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .recent-item, .transaction-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .transaction-item { grid-template-columns: minmax(0, 1fr) auto auto; }
+    .transaction-title { margin: 0 0 3px; font-weight: 800; }
+    .transaction-meta { margin: 0; color: var(--muted); font-size: .87rem; }
+    .transaction-amount { text-align: right; font-weight: 850; white-space: nowrap; }
+    .transaction-original { display: block; color: var(--muted); font-size: .78rem; font-weight: 600; }
+
+    .budget-meter {
+      height: 14px;
+      margin: 20px 0 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--border);
+    }
+
+    .budget-meter span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--brand); transition: width .3s; }
+    .budget-meter span.over { background: var(--danger); }
+    .meter-row { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .88rem; }
+
+    .section-heading { margin-bottom: 22px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      align-items: end;
+      gap: 13px;
+    }
+
+    .budget-form { grid-template-columns: minmax(0, 1fr) auto; max-width: 600px; }
+    .field { display: grid; gap: 7px; }
+    label { font-weight: 750; font-size: .9rem; }
+
+    input, select {
+      width: 100%;
+      min-height: 45px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .primary-button, .secondary-button, .danger-button, .delete-button {
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      font-weight: 800;
+    }
+
+    .primary-button { color: #fff; background: var(--brand); }
+    .secondary-button { color: var(--text); border: 1px solid var(--border); background: var(--surface); }
+    .danger-button { color: #fff; background: var(--danger); }
+    .delete-button { min-height: 38px; padding: 7px 11px; color: var(--danger); border: 1px solid currentColor; background: transparent; }
+    .high-contrast .primary-button, .high-contrast .nav-button.active { color: #001b0e; }
+    .high-contrast .danger-button { color: #160000; }
+
+    .empty-state { padding: 28px; border: 1px dashed var(--border); border-radius: 14px; color: var(--muted); text-align: center; }
+    .transaction-list { margin-top: 18px; }
+
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .achievement { padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+    .achievement.locked { opacity: .58; filter: grayscale(.75); }
+    .achievement-icon { font-size: 2rem; }
+    .achievement h2 { margin: 13px 0 6px; }
+    .achievement p { margin: 0; color: var(--muted); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(7, 18, 12, .55);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-backdrop[hidden] { display: none; }
+
+    .settings-modal {
+      width: min(660px, 100%);
+      max-height: min(88vh, 850px);
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      color: var(--text);
+      background: var(--surface);
+      box-shadow: 0 30px 80px rgba(0,0,0,.26);
+    }
+
+    .modal-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .modal-content { display: grid; gap: 20px; padding: 20px; }
+    .settings-section { display: grid; gap: 13px; }
+    .settings-section + .settings-section { padding-top: 20px; border-top: 1px solid var(--border); }
+    .settings-section > p { margin: -6px 0 0; color: var(--muted); }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .setting-copy { min-width: 0; }
+    .setting-copy strong { display: block; }
+    .setting-copy small { display: block; color: var(--muted); }
+    .setting-control { width: min(240px, 48%); }
+
+    .switch {
+      position: relative;
+      display: inline-flex;
+      flex: 0 0 auto;
+      width: 52px;
+      height: 30px;
+    }
+
+    .switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .switch span { width: 100%; border-radius: 999px; background: #9ca8a0; transition: .2s; }
+    .switch span::after { content: ""; position: absolute; top: 4px; left: 4px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.2); transition: .2s; }
+    .switch input:checked + span { background: var(--brand); }
+    .switch input:checked + span::after { transform: translateX(22px); }
+    .switch input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 80;
+      max-width: calc(100% - 30px);
+      padding: 12px 18px;
+      border-radius: 999px;
+      color: #fff;
+      background: #17221c;
+      box-shadow: var(--shadow);
+      transform: translate(-50%, 130%);
+      opacity: 0;
+      transition: .25s;
+    }
+
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+    @media (max-width: 780px) {
+      .topbar { grid-template-columns: 1fr auto; }
+      .top-actions { grid-column: 2; }
+      .main-nav { width: 100%; justify-content: flex-start; margin: 20px auto; }
+      .summary-card, .dashboard-grid, .achievement-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .form-grid .field:first-child { grid-column: 1 / -1; }
+      .form-grid .primary-button { grid-column: 1 / -1; }
+      .budget-form { grid-template-columns: 1fr; }
+      .transaction-item { grid-template-columns: minmax(0, 1fr) auto; }
+      .transaction-item .delete-button { grid-column: 1 / -1; width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .app-shell { width: min(100% - 20px, 1200px); padding-top: 11px; }
+      .topbar { gap: 8px; }
+      .brand { gap: 7px; }
+      .brand span:last-child { font-size: .96rem; }
+      .brand-mark { width: 36px; height: 36px; border-radius: 11px; font-size: 1rem; }
+      .top-actions { gap: 6px; }
+      .icon-button { width: 38px; height: 38px; }
+      .account-menu { right: 0; }
+      .main-nav { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
+      .nav-button { width: 100%; padding: 9px 7px; }
+      .summary-stat, .card { padding: 18px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .field:first-child, .form-grid .primary-button { grid-column: auto; }
+      .setting-row { align-items: flex-start; }
+      .setting-control { width: 50%; }
+    }
+  </style>
 </head>
 <body>
-    <!-- 用户菜单 -->
-    <div class="user-menu-container" id="userMenuContainer">
-        <div class="user-avatar" id="userAvatar">
-            👤
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="PennyWiseBT">
+        <span class="brand-mark" aria-hidden="true">💰</span>
+        <span>PennyWiseBT</span>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-button avatar-button" id="avatarButton" type="button" aria-label="Account" aria-expanded="false">👤</button>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">⚙️</button>
+        <div class="account-menu" id="accountMenu" hidden>
+          <p class="account-email" id="accountEmail">alex@example.com</p>
+          <button id="switchAccountButton" type="button" data-i18n="switchAccount">Switch account</button>
+          <button id="logoutButton" type="button" data-i18n="logout">Logout</button>
         </div>
-        <div class="user-dropdown" id="userDropdown">
-            <div class="user-info-text" id="userInfoText">
-                <div class="user-name">Loading...</div>
-                <div class="user-email">...</div>
-            </div>
-            <div class="dropdown-item logout" id="logoutBtn">
-                <span>🚪</span> Sign Out
-            </div>
+      </div>
+    </header>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <button class="nav-button active" type="button" data-page="dashboard" data-i18n="dashboard">Dashboard</button>
+      <button class="nav-button" type="button" data-page="transactions" data-i18n="transactions">Transactions</button>
+      <button class="nav-button" type="button" data-page="budget" data-i18n="budgetSetup">Budget Setup</button>
+      <button class="nav-button" type="button" data-page="achievements" data-i18n="achievements">Achievements</button>
+    </nav>
+
+    <main>
+      <section class="page active" id="dashboardPage">
+        <div class="summary-card">
+          <article class="summary-stat">
+            <p class="eyebrow" data-i18n="spentThisMonth">Spent this month</p>
+            <p class="money-hero" id="spentTotal">$0.00</p>
+            <p class="summary-note" id="transactionCount"></p>
+          </article>
+          <article class="summary-stat remaining">
+            <p class="eyebrow" data-i18n="remainingThisMonth">Remaining this month</p>
+            <p class="money-hero" id="remainingTotal">$0.00</p>
+            <p class="summary-note"><span data-i18n="monthlyBudget">Monthly budget</span>: <strong id="budgetTotal">$0.00</strong></p>
+          </article>
         </div>
-    </div>
 
-    <div class="main-container">
-        <!-- Sidebar with Budget Progress -->
-        <aside class="sidebar">
-            <div class="budget-card">
-                <h3>Remaining</h3>
-                <div class="budget-amount" id="remainingDisplay">$0.00</div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar">
-                        <div class="progress-fill" id="progressFill"></div>
-                        <div class="zero-line" id="zeroLine"></div>
-                        <div class="savings-line" id="savingsLine"></div>
-                    </div>
-                </div>
-                <div class="budget-stats">
-                    <div class="stat">
-                        <span class="stat-label">Spent:</span>
-                        <span class="stat-value" id="spentDisplay">$0.00</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Earned:</span>
-                        <span class="stat-value earned" id="earnedDisplay">$0.00</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Monthly Budget:</span>
-                        <span class="stat-value" id="budgetDisplay">$0.00</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Savings Goal:</span>
-                        <span class="stat-value" id="goalDisplay">$0.00</span>
-                    </div>
-                </div>
+        <div class="dashboard-grid">
+          <article class="card">
+            <div class="card-header">
+              <h2 data-i18n="recentTransactions">Recent transactions</h2>
+              <button class="secondary-button" type="button" data-go-page="transactions" data-i18n="viewAll">View all</button>
             </div>
-        </aside>
+            <ul class="recent-list" id="recentList"></ul>
+          </article>
+          <article class="card">
+            <h2 data-i18n="budgetProgress">Budget progress</h2>
+            <div class="budget-meter" aria-hidden="true"><span id="budgetMeter"></span></div>
+            <div class="meter-row">
+              <span id="budgetPercent">0%</span>
+              <span data-i18n="used">used</span>
+            </div>
+          </article>
+        </div>
+      </section>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Navigation Menu -->
-            <nav class="menu">
-                <button class="menu-btn" data-page="spendings">Spendings</button>
-                <button class="menu-btn" data-page="limits">Limits</button>
-                <button class="menu-btn" data-page="history">History</button>
-                <button class="menu-btn active" data-page="summary">Summary</button>
-            </nav>
+      <section class="page" id="transactionsPage">
+        <header class="section-heading">
+          <h1 data-i18n="transactions">Transactions</h1>
+          <p class="lede" data-i18n="transactionsIntro">Add expenses in any supported currency. PennyWiseBT handles the conversion.</p>
+        </header>
+        <article class="card">
+          <form class="form-grid" id="transactionForm">
+            <div class="field">
+              <label for="descriptionInput" data-i18n="description">Description</label>
+              <input id="descriptionInput" type="text" maxlength="80" required data-i18n-placeholder="descriptionPlaceholder" placeholder="e.g. Groceries">
+            </div>
+            <div class="field">
+              <label for="amountInput" data-i18n="amount">Amount</label>
+              <input id="amountInput" type="number" min="0.01" step="0.01" inputmode="decimal" required placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="transactionCurrency" data-i18n="currency">Currency</label>
+              <select id="transactionCurrency">
+                <option value="CAD">CAD</option>
+                <option value="CNY">CNY</option>
+                <option value="USD">USD</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </div>
+            <button class="primary-button" type="submit" data-i18n="addTransaction">Add transaction</button>
+          </form>
+        </article>
+        <ul class="transaction-list" id="transactionList"></ul>
+      </section>
 
-            <!-- Setup Modal -->
-            <section id="setup" class="setup-modal hidden">
-                <div class="setup-modal-card">
-                    <h1>Monthly Setup</h1>
-                    <p class="setup-note">Set your monthly budget and savings goal before tracking your spending.</p>
-                    <div class="setup-form">
-                    <div class="form-group">
-                        <label for="monthlyBudget">Monthly Budget:</label>
-                        <input type="number" id="monthlyBudget" placeholder="Enter your monthly budget" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="savingsGoal">Savings Goal:</label>
-                        <input type="number" id="savingsGoal" placeholder="Enter your savings goal" min="0" step="0.01">
-                    </div>
+      <section class="page" id="budgetPage">
+        <header class="section-heading">
+          <h1 data-i18n="budgetSetup">Budget Setup</h1>
+          <p class="lede" data-i18n="budgetIntro">Set the total you plan to spend this month.</p>
+        </header>
+        <article class="card">
+          <form class="form-grid budget-form" id="budgetForm">
+            <div class="field">
+              <label for="budgetInput"><span data-i18n="monthlyBudget">Monthly budget</span> (<span id="budgetCurrencyLabel">CAD</span>)</label>
+              <input id="budgetInput" type="number" min="0" step="0.01" inputmode="decimal" required>
+            </div>
+            <button class="primary-button" type="submit" data-i18n="saveBudget">Save budget</button>
+          </form>
+        </article>
+      </section>
 
-                    <h2>Category Management</h2>
-                    <div class="category-section">
-                        <div class="category-list" id="categoryList">
-                            <!-- Categories will be populated here -->
-                        </div>
+      <section class="page" id="achievementsPage">
+        <header class="section-heading">
+          <h1 data-i18n="achievements">Achievements</h1>
+          <p class="lede" data-i18n="achievementsIntro">Small wins make strong money habits.</p>
+        </header>
+        <div class="achievement-grid">
+          <article class="achievement" id="firstStepAchievement">
+            <span class="achievement-icon" aria-hidden="true">🌱</span>
+            <h2 data-i18n="firstStep">First step</h2>
+            <p data-i18n="firstStepDesc">Add your first transaction.</p>
+          </article>
+          <article class="achievement" id="trackerAchievement">
+            <span class="achievement-icon" aria-hidden="true">🧾</span>
+            <h2 data-i18n="steadyTracker">Steady tracker</h2>
+            <p data-i18n="steadyTrackerDesc">Record five transactions.</p>
+          </article>
+          <article class="achievement" id="onBudgetAchievement">
+            <span class="achievement-icon" aria-hidden="true">🏆</span>
+            <h2 data-i18n="onBudget">On budget</h2>
+            <p data-i18n="onBudgetDesc">Keep spending within your monthly budget.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
 
-                        <div class="add-category-form">
-                            <h3>Add Category</h3>
-                            <div class="form-group">
-                                <label for="newCategoryName">Category Name:</label>
-                                <input type="text" id="newCategoryName" placeholder="e.g., Food, Transport">
-                            </div>
-                            <div class="form-group">
-                                <label for="newCategoryLimit">Limit (leave empty for no limit):</label>
-                                <input type="number" id="newCategoryLimit" placeholder="Enter limit" min="0" step="0.01">
-                            </div>
-                            <button id="addCategoryBtn" class="btn-primary">Add Category</button>
-                        </div>
-                    </div>
+  <div class="modal-backdrop" id="settingsBackdrop" hidden>
+    <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <header class="modal-header">
+        <h2 id="settingsTitle" data-i18n="settings">Settings</h2>
+        <button class="icon-button" id="closeSettingsButton" type="button" aria-label="Close">✕</button>
+      </header>
+      <div class="modal-content">
+        <section class="settings-section">
+          <h3 data-i18n="accountManagement">Account Management</h3>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong data-i18n="currentEmail">Current email</strong>
+              <small id="settingsEmail">alex@example.com</small>
+            </div>
+          </div>
+          <div>
+            <button class="danger-button" id="deleteDataButton" type="button" data-i18n="deleteAllData">Delete all my data</button>
+          </div>
+        </section>
 
-                        <button id="saveSetupBtn" class="btn-primary">Save Setup</button>
-                    </div>
-                </div>
-            </section>
+        <section class="settings-section">
+          <h3 data-i18n="careSettings">Accessibility Features</h3>
+          <p data-i18n="careSettingsDesc">Adjust PennyWiseBT for easier reading and navigation.</p>
+          <div class="setting-row">
+            <label for="fontSizeSelect" data-i18n="fontSize">Font size</label>
+            <select class="setting-control" id="fontSizeSelect">
+              <option value="normal" data-i18n="normal">Normal</option>
+              <option value="large" data-i18n="large">Large</option>
+              <option value="xlarge" data-i18n="extraLarge">Extra Large</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong data-i18n="buttonOutline">Button outline</strong>
+              <small data-i18n="buttonOutlineDesc">Add a strong blue outline to buttons.</small>
+            </div>
+            <label class="switch">
+              <input id="buttonOutlineToggle" type="checkbox">
+              <span aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong data-i18n="highContrast">High contrast mode</strong>
+              <small data-i18n="highContrastDesc">Use dark backgrounds and brighter controls.</small>
+            </div>
+            <label class="switch">
+              <input id="highContrastToggle" type="checkbox">
+              <span aria-hidden="true"></span>
+            </label>
+          </div>
+        </section>
 
-            <!-- Spendings Page -->
-            <section id="spendings" class="page">
-                <h1>Add Spending</h1>
-                <div class="mode-toggle" style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
-                    <button id="dailyModeBtn" class="btn-primary">Daily Spendings</button>
-                    <button id="fixedModeBtn" class="btn-secondary">Fixed Spendings</button>
-                </div>
-                <div class="spendings-form">
-                    <div class="form-group">
-                        <label for="spendingAmount">Amount:</label>
-                        <input type="number" id="spendingAmount" placeholder="Enter amount" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="spendingType">Type:</label>
-                        <select id="spendingType">
-                            <option value="outcome">Outcome</option>
-                            <option value="income">Income</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="dateGroup">
-                        <label for="spendingDate">Date:</label>
-                        <input type="date" id="spendingDate">
-                    </div>
-                    <div class="form-group hidden" id="periodGroup">
-                        <label for="spendingPeriod">Repeat Every:</label>
-                        <select id="spendingPeriod">
-                            <option value="daily">Every Day</option>
-                            <option value="weekly">Every Week</option>
-                            <option value="monthly">Every Month</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                    </div>
-                    <div class="form-group hidden" id="customPeriodGroup">
-                        <label for="customPeriodText">Custom Period:</label>
-                        <input type="text" id="customPeriodText" placeholder="e.g. every 2 weeks">
-                    </div>
-                    <div class="form-group">
-                        <label for="spendingCategory">Category:</label>
-                        <select id="spendingCategory">
-                            <option value="">Select a category</option>
-                        </select>
-                    </div>
-                    <button id="addSpendingBtn" class="btn-primary">Add Spendings</button>
-                </div>
+        <section class="settings-section">
+          <h3 data-i18n="language">Language</h3>
+          <div class="setting-row">
+            <label for="languageSelect" data-i18n="displayLanguage">Display language</label>
+            <select class="setting-control" id="languageSelect">
+              <option value="en">English</option>
+              <option value="zh">中文</option>
+              <option value="fr">Français</option>
+            </select>
+          </div>
+        </section>
 
-                <div class="setup-form" style="max-width: 100%; margin-top: 20px;">
-                    <h2>Fixed Spendings</h2>
-                    <div id="fixedSpendingsList" class="history-list"></div>
-                </div>
+        <section class="settings-section">
+          <h3 data-i18n="currencySettings">Currency</h3>
+          <p data-i18n="currencyDesc">Amounts are displayed in your default currency using fixed demo rates.</p>
+          <div class="setting-row">
+            <label for="defaultCurrencySelect" data-i18n="defaultCurrency">Default currency</label>
+            <select class="setting-control" id="defaultCurrencySelect">
+              <option value="CAD">CAD</option>
+              <option value="CNY">CNY</option>
+              <option value="USD">USD</option>
+              <option value="JPY">JPY</option>
+            </select>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
 
-                <section id="fixedEditModal" class="setup-modal hidden">
-                    <div class="setup-modal-card" style="max-width: 420px;">
-                        <h2>Edit Fixed Spending</h2>
-                        <div class="form-group">
-                            <label for="fixedEditAmount">Amount:</label>
-                            <input type="number" id="fixedEditAmount" min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="fixedEditCategory">Category:</label>
-                            <select id="fixedEditCategory"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="fixedEditPeriod">Repeat Every:</label>
-                            <select id="fixedEditPeriod">
-                                <option value="daily">Every Day</option>
-                                <option value="weekly">Every Week</option>
-                                <option value="monthly">Every Month</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="fixedEditCustomGroup" hidden>
-                            <label for="fixedEditCustomPeriod">Custom Period:</label>
-                            <input type="text" id="fixedEditCustomPeriod" placeholder="e.g. every 2 weeks">
-                        </div>
-                        <div class="form-group">
-                            <label for="fixedEditStartDate">Start Date:</label>
-                            <input type="date" id="fixedEditStartDate">
-                        </div>
-                        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top: 10px;">
-                            <button id="cancelFixedEditBtn" class="btn-secondary">Cancel</button>
-                            <button id="saveFixedEditBtn" class="btn-primary">Save Changes</button>
-                        </div>
-                    </div>
-                </section>
-            </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-            <!-- Limits Page -->
-            <section id="limits" class="page">
-                <h1>Category Limits</h1>
-                <div class="limits-panel">
-                    <div class="setup-form" style="max-width: 100%; margin-bottom: 20px;">
-                        <h2>Add or Update Category Limits</h2>
-                        <div class="form-group">
-                            <label for="limitCategoryName">Category Name:</label>
-                            <input type="text" id="limitCategoryName" placeholder="e.g., Entertainment">
-                        </div>
-                        <div class="form-group">
-                            <label for="limitCategoryAmount">Monthly Limit:</label>
-                            <input type="number" id="limitCategoryAmount" placeholder="Optional limit" min="0" step="0.01">
-                        </div>
-                        <button id="addLimitCategoryBtn" class="btn-primary">Add Category</button>
-                    </div>
+  <script>
+    (() => {
+      "use strict";
 
-                    <div class="setup-form" style="max-width: 100%; margin-bottom: 20px;">
-                        <h2>Set Category Limits</h2>
-                        <div id="limitsCategoryList" class="limits-list"></div>
-                        <button id="saveLimitsBtn" class="btn-primary">Save Limits</button>
-                    </div>
+      const STORAGE_KEY = "pennyWiseBT_v2";
+      const RATES_IN_CAD = Object.freeze({ CAD: 1, USD: 1.35, CNY: 1.35 / 7.2, JPY: 1.35 / 150 });
+      const supportedLanguages = ["en", "zh", "fr"];
 
-                </div>
-            </section>
+      const translations = {
+        en: {
+          dashboard: "Dashboard", transactions: "Transactions", budgetSetup: "Budget Setup", achievements: "Achievements",
+          spentThisMonth: "Spent this month", remainingThisMonth: "Remaining this month", monthlyBudget: "Monthly budget",
+          recentTransactions: "Recent transactions", viewAll: "View all", budgetProgress: "Budget progress", used: "used",
+          transactionsIntro: "Add expenses in any supported currency. PennyWiseBT handles the conversion.",
+          description: "Description", descriptionPlaceholder: "e.g. Groceries", amount: "Amount", currency: "Currency",
+          addTransaction: "Add transaction", budgetIntro: "Set the total you plan to spend this month.", saveBudget: "Save budget",
+          achievementsIntro: "Small wins make strong money habits.", firstStep: "First step", firstStepDesc: "Add your first transaction.",
+          steadyTracker: "Steady tracker", steadyTrackerDesc: "Record five transactions.", onBudget: "On budget",
+          onBudgetDesc: "Keep spending within your monthly budget.", settings: "Settings", accountManagement: "Account Management",
+          currentEmail: "Current email", deleteAllData: "Delete all my data", careSettings: "Accessibility Features",
+          careSettingsDesc: "Adjust PennyWiseBT for easier reading and navigation.", fontSize: "Font size", normal: "Normal",
+          large: "Large", extraLarge: "Extra Large", buttonOutline: "Button outline",
+          buttonOutlineDesc: "Add a strong blue outline to buttons.", highContrast: "High contrast mode",
+          highContrastDesc: "Use dark backgrounds and brighter controls.", language: "Language", displayLanguage: "Display language",
+          currencySettings: "Currency", currencyDesc: "Amounts are displayed in your default currency using fixed demo rates.",
+          defaultCurrency: "Default currency", switchAccount: "Switch account", logout: "Logout", login: "Login",
+          delete: "Delete", noTransactions: "No transactions yet.", transactionCount: "{count} transactions this month",
+          confirmDelete: "Delete all transactions, budget data, and preferences? This cannot be undone.",
+          dataDeleted: "All local data was deleted.", transactionAdded: "Transaction added.", transactionDeleted: "Transaction deleted.",
+          budgetSaved: "Budget saved.", settingsSaved: "Setting saved.", switchedAccount: "Account switched (demo).",
+          loggedOut: "You are logged out (demo).", loggedIn: "You are logged in (demo).",
+          mockGroceries: "Weekend groceries", mockTransit: "Transit pass", mockCoffee: "Coffee with a friend"
+        },
+        zh: {
+          dashboard: "仪表板", transactions: "交易记录", budgetSetup: "预算设置", achievements: "成就",
+          spentThisMonth: "本月已花费", remainingThisMonth: "本月剩余", monthlyBudget: "每月预算",
+          recentTransactions: "最近交易", viewAll: "查看全部", budgetProgress: "预算进度", used: "已使用",
+          transactionsIntro: "使用支持的任意货币添加支出，PennyWiseBT 会自动换算。",
+          description: "描述", descriptionPlaceholder: "例如：杂货", amount: "金额", currency: "货币",
+          addTransaction: "添加交易", budgetIntro: "设置您本月计划支出的总额。", saveBudget: "保存预算",
+          achievementsIntro: "小小的胜利能培养稳健的理财习惯。", firstStep: "第一步", firstStepDesc: "添加您的第一笔交易。",
+          steadyTracker: "坚持记录", steadyTrackerDesc: "记录五笔交易。", onBudget: "控制预算",
+          onBudgetDesc: "将支出保持在每月预算以内。", settings: "设置", accountManagement: "账户管理",
+          currentEmail: "当前邮箱", deleteAllData: "删除我的所有数据", careSettings: "无障碍功能",
+          careSettingsDesc: "调整 PennyWiseBT，使阅读和操作更加轻松。", fontSize: "字体大小", normal: "正常",
+          large: "大", extraLarge: "特大", buttonOutline: "按钮轮廓",
+          buttonOutlineDesc: "为所有按钮添加醒目的蓝色轮廓。", highContrast: "高对比度模式",
+          highContrastDesc: "使用深色背景和高亮控件。", language: "语言", displayLanguage: "显示语言",
+          currencySettings: "货币", currencyDesc: "金额使用固定演示汇率显示为您的默认货币。",
+          defaultCurrency: "默认货币", switchAccount: "切换账户", logout: "退出登录", login: "登录",
+          delete: "删除", noTransactions: "暂无交易。", transactionCount: "本月共 {count} 笔交易",
+          confirmDelete: "删除所有交易、预算数据和偏好设置？此操作无法撤销。",
+          dataDeleted: "所有本地数据已删除。", transactionAdded: "交易已添加。", transactionDeleted: "交易已删除。",
+          budgetSaved: "预算已保存。", settingsSaved: "设置已保存。", switchedAccount: "账户已切换（演示）。",
+          loggedOut: "您已退出登录（演示）。", loggedIn: "您已登录（演示）。",
+          mockGroceries: "周末杂货", mockTransit: "公交月票", mockCoffee: "与朋友喝咖啡"
+        },
+        fr: {
+          dashboard: "Tableau de bord", transactions: "Transactions", budgetSetup: "Configuration du budget", achievements: "Réussites",
+          spentThisMonth: "Dépensé ce mois-ci", remainingThisMonth: "Reste ce mois-ci", monthlyBudget: "Budget mensuel",
+          recentTransactions: "Transactions récentes", viewAll: "Tout voir", budgetProgress: "Progression du budget", used: "utilisé",
+          transactionsIntro: "Ajoutez des dépenses dans une devise prise en charge. PennyWiseBT fait la conversion.",
+          description: "Description", descriptionPlaceholder: "p. ex. Épicerie", amount: "Montant", currency: "Devise",
+          addTransaction: "Ajouter la transaction", budgetIntro: "Définissez le total que vous prévoyez dépenser ce mois-ci.", saveBudget: "Enregistrer le budget",
+          achievementsIntro: "Les petites victoires créent de bonnes habitudes financières.", firstStep: "Premier pas", firstStepDesc: "Ajoutez votre première transaction.",
+          steadyTracker: "Suivi régulier", steadyTrackerDesc: "Enregistrez cinq transactions.", onBudget: "Budget respecté",
+          onBudgetDesc: "Gardez vos dépenses dans votre budget mensuel.", settings: "Paramètres", accountManagement: "Gestion du compte",
+          currentEmail: "Courriel actuel", deleteAllData: "Supprimer toutes mes données", careSettings: "Fonctions d’accessibilité",
+          careSettingsDesc: "Adaptez PennyWiseBT pour faciliter la lecture et la navigation.", fontSize: "Taille du texte", normal: "Normale",
+          large: "Grande", extraLarge: "Très grande", buttonOutline: "Contour des boutons",
+          buttonOutlineDesc: "Ajoutez un contour bleu prononcé aux boutons.", highContrast: "Mode contraste élevé",
+          highContrastDesc: "Utilisez des arrière-plans sombres et des commandes plus vives.", language: "Langue", displayLanguage: "Langue d’affichage",
+          currencySettings: "Devise", currencyDesc: "Les montants utilisent votre devise par défaut et des taux de démonstration fixes.",
+          defaultCurrency: "Devise par défaut", switchAccount: "Changer de compte", logout: "Déconnexion", login: "Connexion",
+          delete: "Supprimer", noTransactions: "Aucune transaction.", transactionCount: "{count} transactions ce mois-ci",
+          confirmDelete: "Supprimer toutes les transactions, le budget et les préférences ? Cette action est irréversible.",
+          dataDeleted: "Toutes les données locales ont été supprimées.", transactionAdded: "Transaction ajoutée.", transactionDeleted: "Transaction supprimée.",
+          budgetSaved: "Budget enregistré.", settingsSaved: "Paramètre enregistré.", switchedAccount: "Compte changé (démo).",
+          loggedOut: "Vous êtes déconnecté (démo).", loggedIn: "Vous êtes connecté (démo).",
+          mockGroceries: "Épicerie du week-end", mockTransit: "Carte de transport", mockCoffee: "Café avec un ami"
+        }
+      };
 
-            <!-- History Page -->
-            <section id="history" class="page">
-                <h1>Spending History</h1>
-                <div class="history-filters">
-                    <div class="filter-group">
-                        <label for="filterCategory">Filter by Category:</label>
-                        <select id="filterCategory">
-                            <option value="">All Categories</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filterType">Filter by Type:</label>
-                        <select id="filterType">
-                            <option value="">All Types</option>
-                            <option value="income">Income Only</option>
-                            <option value="outcome">Outcome Only</option>
-                        </select>
-                    </div>
-                    <button id="resetFiltersBtn" class="btn-secondary">Reset Filters</button>
-                </div>
-                <div class="history-list" id="historyList">
-                    <!-- History items will be populated here -->
-                </div>
-            </section>
+      const browserLanguage = (navigator.language || "en").slice(0, 2).toLowerCase();
+      const defaultLanguage = supportedLanguages.includes(browserLanguage) ? browserLanguage : "en";
 
-            <!-- Summary Page -->
-            <section id="summary" class="page">
-                <h1>Monthly Summary</h1>
-                <div class="summary-content">
-                    <div class="summary-section">
-                        <h2>Overview</h2>
-                        <div class="summary-grid">
-                            <div class="summary-card">
-                                <span class="summary-label">Total Spent:</span>
-                                <span class="summary-value" id="summarySpent">$0.00</span>
-                            </div>
-                            <div class="summary-card">
-                                <span class="summary-label">Total Earned:</span>
-                                <span class="summary-value earned" id="summaryEarned">$0.00</span>
-                            </div>
-                            <div class="summary-card">
-                                <span class="summary-label">Net Difference:</span>
-                                <span class="summary-value" id="summaryDifference">$0.00</span>
-                            </div>
-                            <div class="summary-card">
-                                <span class="summary-label">Remaining Budget:</span>
-                                <span class="summary-value" id="summaryRemaining">$0.00</span>
-                            </div>
-                            <div class="summary-card">
-                                <span class="summary-label">Savings Goal:</span>
-                                <span class="summary-value" id="summarySavingsGoal">$0.00</span>
-                            </div>
-                            <div class="summary-card">
-                                <span class="summary-label">Savings Status:</span>
-                                <span class="summary-value" id="savingsStatus">Not Set</span>
-                            </div>
-                        </div>
-                    </div>
+      const defaultState = () => ({
+        user: { email: "alex@example.com", loggedIn: true },
+        language: defaultLanguage,
+        defaultCurrency: "CAD",
+        accessibility: { fontSize: "normal", buttonOutline: false, highContrast: false },
+        budgetCad: 2400,
+        transactions: [
+          { id: "mock-1", descriptionKey: "mockGroceries", originalAmount: 86.42, originalCurrency: "CAD", entryConvertedAmount: 86.42, entryConvertedCurrency: "CAD", createdAt: "2026-06-11T12:00:00.000Z" },
+          { id: "mock-2", descriptionKey: "mockTransit", originalAmount: 50, originalCurrency: "USD", entryConvertedAmount: 67.5, entryConvertedCurrency: "CAD", createdAt: "2026-06-09T12:00:00.000Z" },
+          { id: "mock-3", descriptionKey: "mockCoffee", originalAmount: 42, originalCurrency: "CNY", entryConvertedAmount: 7.88, entryConvertedCurrency: "CAD", createdAt: "2026-06-07T12:00:00.000Z" }
+        ]
+      });
 
-                    <div class="summary-section">
-                        <h2>Budget & Savings</h2>
-                        <div class="budget-form-grid">
-                            <div class="form-group">
-                                <label for="summaryMonthlyBudgetInput">Monthly Budget</label>
-                                <input type="number" id="summaryMonthlyBudgetInput" placeholder="Enter monthly budget" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="summarySavingsGoalInput">Savings Goal</label>
-                                <input type="number" id="summarySavingsGoalInput" placeholder="Enter savings goal" min="0" step="0.01">
-                            </div>
-                        </div>
-                        <button id="updateBudgetBtn" class="btn-primary">Update Budget</button>
-                    </div>
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved) return defaultState();
+          const base = defaultState();
+          return {
+            ...base,
+            ...saved,
+            user: { ...base.user, ...(saved.user || {}) },
+            accessibility: { ...base.accessibility, ...(saved.accessibility || {}) },
+            transactions: Array.isArray(saved.transactions) ? saved.transactions : base.transactions
+          };
+        } catch {
+          return defaultState();
+        }
+      }
 
-                    <div class="summary-section">
-                        <h2>Spending Distribution</h2>
-                        <div class="categories-breakdown" id="categoriesBreakdown">
-                            <!-- Category breakdown will be populated here -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
+      let state = loadState();
+      let toastTimer;
 
-    <script type="module" src="script.js"></script>
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+      const elements = {
+        spentTotal: $("#spentTotal"), remainingTotal: $("#remainingTotal"), budgetTotal: $("#budgetTotal"),
+        transactionCount: $("#transactionCount"), recentList: $("#recentList"), transactionList: $("#transactionList"),
+        budgetMeter: $("#budgetMeter"), budgetPercent: $("#budgetPercent"), budgetInput: $("#budgetInput"),
+        budgetCurrencyLabel: $("#budgetCurrencyLabel"), transactionCurrency: $("#transactionCurrency"),
+        settingsBackdrop: $("#settingsBackdrop"), accountMenu: $("#accountMenu"), avatarButton: $("#avatarButton"),
+        accountEmail: $("#accountEmail"), settingsEmail: $("#settingsEmail"), logoutButton: $("#logoutButton"),
+        languageSelect: $("#languageSelect"), defaultCurrencySelect: $("#defaultCurrencySelect"),
+        fontSizeSelect: $("#fontSizeSelect"), buttonOutlineToggle: $("#buttonOutlineToggle"),
+        highContrastToggle: $("#highContrastToggle"), toast: $("#toast")
+      };
+
+      function t(key, replacements = {}) {
+        let value = translations[state.language]?.[key] || translations.en[key] || key;
+        Object.entries(replacements).forEach(([name, replacement]) => {
+          value = value.replaceAll("{" + name + "}", replacement);
+        });
+        return value;
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function convert(amount, fromCurrency, toCurrency) {
+        const cadValue = Number(amount) * RATES_IN_CAD[fromCurrency];
+        return cadValue / RATES_IN_CAD[toCurrency];
+      }
+
+      function formatMoney(amount, currency = state.defaultCurrency) {
+        const locale = { en: "en-CA", zh: "zh-CN", fr: "fr-CA" }[state.language];
+        return new Intl.NumberFormat(locale, {
+          style: "currency",
+          currency,
+          minimumFractionDigits: currency === "JPY" ? 0 : 2,
+          maximumFractionDigits: currency === "JPY" ? 0 : 2
+        }).format(Number(amount) || 0);
+      }
+
+      function currentTransactionAmount(transaction) {
+        return convert(transaction.originalAmount, transaction.originalCurrency, state.defaultCurrency);
+      }
+
+      function totalSpent() {
+        return state.transactions.reduce((total, transaction) => total + currentTransactionAmount(transaction), 0);
+      }
+
+      function currentBudget() {
+        return convert(state.budgetCad, "CAD", state.defaultCurrency);
+      }
+
+      function transactionDescription(transaction) {
+        return transaction.descriptionKey ? t(transaction.descriptionKey) : transaction.description;
+      }
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        elements.toast.textContent = message;
+        elements.toast.classList.add("show");
+        toastTimer = setTimeout(() => elements.toast.classList.remove("show"), 2400);
+      }
+
+      function applyAccessibility() {
+        document.documentElement.dataset.fontSize = state.accessibility.fontSize;
+        document.body.classList.toggle("button-outlines", state.accessibility.buttonOutline);
+        document.body.classList.toggle("high-contrast", state.accessibility.highContrast);
+        elements.fontSizeSelect.value = state.accessibility.fontSize;
+        elements.buttonOutlineToggle.checked = state.accessibility.buttonOutline;
+        elements.highContrastToggle.checked = state.accessibility.highContrast;
+      }
+
+      function applyTranslations() {
+        document.documentElement.lang = state.language === "zh" ? "zh-CN" : state.language;
+        $$("[data-i18n]").forEach((element) => {
+          element.textContent = t(element.dataset.i18n);
+        });
+        $$("[data-i18n-placeholder]").forEach((element) => {
+          element.placeholder = t(element.dataset.i18nPlaceholder);
+        });
+        $("#settingsButton").setAttribute("aria-label", t("settings"));
+        $("#closeSettingsButton").setAttribute("aria-label", state.language === "fr" ? "Fermer" : state.language === "zh" ? "关闭" : "Close");
+        elements.logoutButton.textContent = state.user.loggedIn ? t("logout") : t("login");
+        elements.languageSelect.value = state.language;
+      }
+
+      function renderTransactions() {
+        const sorted = [...state.transactions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        elements.transactionList.innerHTML = "";
+        elements.recentList.innerHTML = "";
+
+        if (!sorted.length) {
+          const empty = document.createElement("li");
+          empty.className = "empty-state";
+          empty.textContent = t("noTransactions");
+          elements.transactionList.append(empty);
+          elements.recentList.append(empty.cloneNode(true));
+          return;
+        }
+
+        sorted.forEach((transaction) => {
+          const item = document.createElement("li");
+          item.className = "transaction-item";
+
+          const copy = document.createElement("div");
+          const title = document.createElement("p");
+          title.className = "transaction-title";
+          title.textContent = transactionDescription(transaction);
+          const meta = document.createElement("p");
+          meta.className = "transaction-meta";
+          meta.textContent = new Intl.DateTimeFormat(
+            { en: "en-CA", zh: "zh-CN", fr: "fr-CA" }[state.language],
+            { dateStyle: "medium" }
+          ).format(new Date(transaction.createdAt));
+          copy.append(title, meta);
+
+          const amount = document.createElement("div");
+          amount.className = "transaction-amount";
+          amount.textContent = formatMoney(currentTransactionAmount(transaction));
+          const original = document.createElement("span");
+          original.className = "transaction-original";
+          original.textContent = formatMoney(transaction.originalAmount, transaction.originalCurrency);
+          amount.append(original);
+
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "delete-button";
+          deleteButton.dataset.transactionId = transaction.id;
+          deleteButton.textContent = t("delete");
+          item.append(copy, amount, deleteButton);
+          elements.transactionList.append(item);
+        });
+
+        sorted.slice(0, 3).forEach((transaction) => {
+          const item = document.createElement("li");
+          item.className = "recent-item";
+          const copy = document.createElement("div");
+          const title = document.createElement("p");
+          title.className = "transaction-title";
+          title.textContent = transactionDescription(transaction);
+          const original = document.createElement("p");
+          original.className = "transaction-meta";
+          original.textContent = formatMoney(transaction.originalAmount, transaction.originalCurrency);
+          copy.append(title, original);
+          const amount = document.createElement("span");
+          amount.className = "transaction-amount";
+          amount.textContent = formatMoney(currentTransactionAmount(transaction));
+          item.append(copy, amount);
+          elements.recentList.append(item);
+        });
+      }
+
+      function renderDashboard() {
+        const spent = totalSpent();
+        const budget = currentBudget();
+        const remaining = budget - spent;
+        const percent = budget > 0 ? (spent / budget) * 100 : 0;
+
+        elements.spentTotal.textContent = formatMoney(spent);
+        elements.remainingTotal.textContent = formatMoney(remaining);
+        elements.remainingTotal.classList.toggle("negative", remaining < 0);
+        elements.budgetTotal.textContent = formatMoney(budget);
+        elements.transactionCount.textContent = t("transactionCount", { count: state.transactions.length });
+        elements.budgetMeter.style.width = Math.min(percent, 100) + "%";
+        elements.budgetMeter.classList.toggle("over", percent > 100);
+        elements.budgetPercent.textContent = Math.round(percent) + "%";
+
+        $("#firstStepAchievement").classList.toggle("locked", state.transactions.length < 1);
+        $("#trackerAchievement").classList.toggle("locked", state.transactions.length < 5);
+        $("#onBudgetAchievement").classList.toggle("locked", budget <= 0 || spent > budget);
+      }
+
+      function renderAccount() {
+        elements.accountEmail.textContent = state.user.email;
+        elements.settingsEmail.textContent = state.user.email;
+        elements.avatarButton.style.filter = state.user.loggedIn ? "none" : "grayscale(1)";
+        elements.logoutButton.textContent = state.user.loggedIn ? t("logout") : t("login");
+      }
+
+      function renderCurrencyControls() {
+        elements.defaultCurrencySelect.value = state.defaultCurrency;
+        elements.transactionCurrency.value = state.defaultCurrency;
+        elements.budgetCurrencyLabel.textContent = state.defaultCurrency;
+        elements.budgetInput.value = currentBudget().toFixed(state.defaultCurrency === "JPY" ? 0 : 2);
+      }
+
+      function renderAll() {
+        applyAccessibility();
+        applyTranslations();
+        renderAccount();
+        renderCurrencyControls();
+        renderTransactions();
+        renderDashboard();
+      }
+
+      function showPage(pageName) {
+        $$(".page").forEach((page) => page.classList.toggle("active", page.id === pageName + "Page"));
+        $$(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.page === pageName));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function openSettings() {
+        elements.settingsBackdrop.hidden = false;
+        document.body.style.overflow = "hidden";
+        $("#closeSettingsButton").focus();
+      }
+
+      function closeSettings() {
+        elements.settingsBackdrop.hidden = true;
+        document.body.style.overflow = "";
+        $("#settingsButton").focus();
+      }
+
+      $$(".nav-button").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
+      $$("[data-go-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.goPage)));
+
+      $("#transactionForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const description = $("#descriptionInput").value.trim();
+        const originalAmount = Number($("#amountInput").value);
+        const originalCurrency = elements.transactionCurrency.value;
+        if (!description || !Number.isFinite(originalAmount) || originalAmount <= 0) return;
+
+        state.transactions.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+          description,
+          originalAmount,
+          originalCurrency,
+          entryConvertedAmount: convert(originalAmount, originalCurrency, state.defaultCurrency),
+          entryConvertedCurrency: state.defaultCurrency,
+          createdAt: new Date().toISOString()
+        });
+        saveState();
+        event.currentTarget.reset();
+        elements.transactionCurrency.value = state.defaultCurrency;
+        renderTransactions();
+        renderDashboard();
+        showToast(t("transactionAdded"));
+      });
+
+      elements.transactionList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-transaction-id]");
+        if (!button) return;
+        state.transactions = state.transactions.filter((transaction) => transaction.id !== button.dataset.transactionId);
+        saveState();
+        renderTransactions();
+        renderDashboard();
+        showToast(t("transactionDeleted"));
+      });
+
+      $("#budgetForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const enteredBudget = Number(elements.budgetInput.value);
+        if (!Number.isFinite(enteredBudget) || enteredBudget < 0) return;
+        state.budgetCad = convert(enteredBudget, state.defaultCurrency, "CAD");
+        saveState();
+        renderDashboard();
+        showToast(t("budgetSaved"));
+      });
+
+      $("#settingsButton").addEventListener("click", openSettings);
+      $("#closeSettingsButton").addEventListener("click", closeSettings);
+      elements.settingsBackdrop.addEventListener("click", (event) => {
+        if (event.target === elements.settingsBackdrop) closeSettings();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (!elements.settingsBackdrop.hidden) closeSettings();
+          elements.accountMenu.hidden = true;
+          elements.avatarButton.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      elements.avatarButton.addEventListener("click", () => {
+        elements.accountMenu.hidden = !elements.accountMenu.hidden;
+        elements.avatarButton.setAttribute("aria-expanded", String(!elements.accountMenu.hidden));
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".top-actions")) {
+          elements.accountMenu.hidden = true;
+          elements.avatarButton.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      $("#switchAccountButton").addEventListener("click", () => {
+        state.user.loggedIn = true;
+        state.user.email = state.user.email === "alex@example.com" ? "taylor@example.com" : "alex@example.com";
+        saveState();
+        renderAccount();
+        elements.accountMenu.hidden = true;
+        showToast(t("switchedAccount"));
+      });
+
+      elements.logoutButton.addEventListener("click", () => {
+        state.user.loggedIn = !state.user.loggedIn;
+        saveState();
+        renderAccount();
+        elements.accountMenu.hidden = true;
+        showToast(state.user.loggedIn ? t("loggedIn") : t("loggedOut"));
+      });
+
+      elements.fontSizeSelect.addEventListener("change", () => {
+        state.accessibility.fontSize = elements.fontSizeSelect.value;
+        saveState();
+        applyAccessibility();
+        showToast(t("settingsSaved"));
+      });
+
+      elements.buttonOutlineToggle.addEventListener("change", () => {
+        state.accessibility.buttonOutline = elements.buttonOutlineToggle.checked;
+        saveState();
+        applyAccessibility();
+        showToast(t("settingsSaved"));
+      });
+
+      elements.highContrastToggle.addEventListener("change", () => {
+        state.accessibility.highContrast = elements.highContrastToggle.checked;
+        saveState();
+        applyAccessibility();
+        showToast(t("settingsSaved"));
+      });
+
+      elements.languageSelect.addEventListener("change", () => {
+        state.language = elements.languageSelect.value;
+        saveState();
+        renderAll();
+        showToast(t("settingsSaved"));
+      });
+
+      elements.defaultCurrencySelect.addEventListener("change", () => {
+        state.defaultCurrency = elements.defaultCurrencySelect.value;
+        saveState();
+        renderCurrencyControls();
+        renderTransactions();
+        renderDashboard();
+        showToast(t("settingsSaved"));
+      });
+
+      $("#deleteDataButton").addEventListener("click", () => {
+        if (!window.confirm(t("confirmDelete"))) return;
+        const language = state.language;
+        state = defaultState();
+        state.language = language;
+        state.transactions = [];
+        state.budgetCad = 0;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        closeSettings();
+        renderAll();
+        showToast(t("dataDeleted"));
+      });
+
+      renderAll();
+    })();
+  </script>
 </body>
 </html>
