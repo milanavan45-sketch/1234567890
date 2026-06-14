@@ -83,7 +83,7 @@
     }
 
     .app-shell {
-      width: min(1200px, calc(100% - 28px));
+      width: min(1200px, calc(100% - 40px));
       margin: 0 auto;
       padding: 18px 0 48px;
     }
@@ -148,7 +148,7 @@
       top: 52px;
       right: 52px;
       z-index: 20;
-      width: 230px;
+      width: 150px;
       padding: 10px;
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -164,27 +164,30 @@
 
     .main-nav {
       display: flex;
-      width: fit-content;
-      max-width: 600px;
-      margin: 26px auto;
+      width: 100%;
+      max-width: 100%;
+      margin: 12px auto 20px;
       padding: 5px;
       border: 1px solid var(--border);
       border-radius: 16px;
       background: rgba(255, 255, 255, .78);
       box-shadow: 0 6px 18px rgba(22, 56, 38, .05);
-      overflow-x: auto;
+      overflow: visible;
+      flex-wrap: nowrap;
     }
 
     .high-contrast .main-nav { background: var(--surface); }
 
     .nav-button {
-      flex: 0 0 auto;
-      padding: 10px 15px;
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 9px 6px;
       border-radius: 11px;
       color: var(--muted);
       background: transparent;
       font-weight: 750;
-      white-space: nowrap;
+      font-size: clamp(.68rem, 1.35vw, .88rem);
+      line-height: 1.15;
     }
 
     .nav-button.active {
@@ -429,7 +432,7 @@
     @media (max-width: 780px) {
       .topbar { grid-template-columns: 1fr auto; }
       .top-actions { grid-column: 2; }
-      .main-nav { width: 100%; justify-content: flex-start; margin: 20px auto; }
+      .main-nav { width: 100%; justify-content: center; margin: 10px auto 20px; }
       .summary-card, .dashboard-grid, .achievement-grid { grid-template-columns: 1fr; }
       .form-grid { grid-template-columns: 1fr 1fr; }
       .form-grid .field:first-child { grid-column: 1 / -1; }
@@ -440,7 +443,7 @@
     }
 
     @media (max-width: 480px) {
-      .app-shell { width: min(100% - 20px, 1200px); padding-top: 11px; }
+      .app-shell { width: min(100% - 40px, 1200px); padding-top: 10px; }
       .topbar { gap: 8px; }
       .brand { gap: 7px; }
       .brand span:last-child { font-size: .96rem; }
@@ -448,8 +451,8 @@
       .top-actions { gap: 6px; }
       .icon-button { width: 38px; height: 38px; }
       .account-menu { right: 0; }
-      .main-nav { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
-      .nav-button { width: 100%; padding: 9px 7px; }
+      .main-nav { display: flex; flex-wrap: nowrap; overflow: visible; padding: 3px; }
+      .nav-button { width: auto; padding: 7px 2px; font-size: .58rem; }
       .summary-stat, .card { padding: 18px; }
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .field:first-child, .form-grid .primary-button { grid-column: auto; }
@@ -481,13 +484,10 @@
       </div>
 
       <div class="top-actions">
-        <div class="coin-balance" id="coinBalance" aria-label="Penny balance">馃獧 <span>0</span></div>
-        <button class="icon-button avatar-button" id="avatarButton" type="button" aria-label="Account" aria-expanded="false">棣冩噥</button>
-        <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">閳挎瑱绗?/button>
+        <div class="coin-balance" id="coinBalance" aria-label="Penny balance">🪙 <span>0</span></div>
+        <button class="icon-button avatar-button" id="avatarButton" type="button" aria-label="Account" aria-expanded="false">👤</button>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">⚙️</button>
         <div class="account-menu" id="accountMenu" hidden>
-          <p class="account-name" id="accountName">Account</p>
-          <p class="account-email" id="accountEmail"></p>
-          <button id="switchAccountButton" type="button" data-i18n="switchAccount">Switch account</button>
           <button id="logoutButton" type="button" data-i18n="logout">Logout</button>
         </div>
       </div>
@@ -659,8 +659,8 @@
             <label for="languageSelect" data-i18n="displayLanguage">Display language</label>
             <select class="setting-control" id="languageSelect">
               <option value="en">English</option>
-              <option value="zh">娑擃厽鏋?/option>
-              <option value="fr">Fran鑾絘is</option>
+              <option value="zh">中文</option>
+              <option value="fr">Français</option>
             </select>
           </div>
         </section>
@@ -748,9 +748,9 @@
     const esc=v=>{const d=document.createElement("div");d.textContent=v;return d.innerHTML},empty=()=>{const n=document.createElement("li");n.className="empty-state";n.textContent=tr("noRecords");return n};
     function toast(v){clearTimeout(timer);$("#toast").textContent=v;$("#toast").classList.add("show");timer=setTimeout(()=>$("#toast").classList.remove("show"),2200)}
     function categories(){[[$("#categoryInput"),false],[$("#filterCategory"),true],[$("#recurringCategory"),false]].forEach(([el,all])=>{if(!el)return;const val=el.value;el.innerHTML=all?'<option value="all">'+tr("all")+"</option>":"";C.forEach(c=>el.add(new Option(catName(c[0]),c[0])));if([...el.options].some(o=>o.value===val))el.value=val})}
-    function i18n(){document.documentElement.lang=state.language==="zh"?"zh-CN":state.language;$$("[data-i18n]").forEach(e=>e.textContent=tr(e.dataset.i18n));$$("[data-i18n-placeholder]").forEach(e=>e.placeholder=tr(e.dataset.i18nPlaceholder));$("#languageSelect").value=state.language;categories()}
+    function i18n(){document.documentElement.lang=state.language==="zh"?"zh-CN":state.language;$$("[data-i18n]").forEach(e=>e.textContent=tr(e.dataset.i18n));$$("[data-i18n-placeholder]").forEach(e=>e.placeholder=tr(e.dataset.i18nPlaceholder));const languages=$("#languageSelect");languages.replaceChildren(new Option("English","en"),new Option("中文","zh"),new Option("Français","fr"));languages.value=state.language;categories()}
     function access(){document.documentElement.dataset.fontSize=state.accessibility.fontSize;document.body.classList.toggle("button-outlines",state.accessibility.buttonOutline);document.body.classList.toggle("high-contrast",state.accessibility.highContrast);document.body.classList.toggle("theme-dark",state.activeTheme==="dark");document.body.classList.toggle("theme-warm",state.activeTheme==="warm");document.body.classList.toggle("gold-avatar",state.purchases.includes("gold"));$("#fontSizeSelect").value=state.accessibility.fontSize;$("#buttonOutlineToggle").checked=state.accessibility.buttonOutline;$("#highContrastToggle").checked=state.accessibility.highContrast;const select=$("#themeSelect");select.innerHTML="";select.add(new Option(tr("themeDefault"),"default"));if(state.purchases.includes("dark"))select.add(new Option(tr("themeDark"),"dark"));if(state.purchases.includes("warm"))select.add(new Option(tr("themeWarm"),"warm"));if(![...select.options].some(o=>o.value===state.activeTheme))state.activeTheme="default";select.value=state.activeTheme}
-    function account(){const n=user.isDemo?tr("demoAccount"):(user.name||user.email);$(".brand-mark").textContent="💰";$("#settingsButton").textContent="⚙️";$("#closeSettingsButton").textContent="✕";$("#coinBalance").firstChild.nodeValue="🪙 ";$("#accountName").textContent=n;$("#accountEmail").textContent=user.email;$("#settingsAccountName").textContent=n;$("#settingsEmail").textContent=user.email;$("#avatarButton").textContent=user.isDemo?"D":n[0].toUpperCase();$("#coinBalance span").textContent=state.pennyBalance}
+    function account(){const n=user.isDemo?tr("demoAccount"):(user.name||user.email);$(".brand-mark").textContent="💰";$("#settingsButton").textContent="⚙️";$("#closeSettingsButton").textContent="✕";$("#coinBalance").firstChild.nodeValue="🪙 ";$("#settingsAccountName").textContent=n;$("#settingsEmail").textContent=user.email;$("#avatarButton").textContent="👤";$("#coinBalance span").textContent=state.pennyBalance}
     function node(x,del=false){const li=document.createElement("li");li.className=del?"history-item":"recent-item";const info=document.createElement("div");info.innerHTML='<p class="transaction-title">'+(x.recurring?'<span class="recurring-mark">🔁</span> ':"")+esc(catName(x.category))+" · "+esc(x.description)+'</p><p class="transaction-meta">'+new Intl.DateTimeFormat({en:"en-CA",zh:"zh-CN",fr:"fr-CA"}[state.language],{dateStyle:"medium"}).format(new Date(x.date+"T12:00:00"))+"</p>";const a=document.createElement("div");a.className="transaction-amount "+x.type;a.textContent=(x.type==="income"?"+":"-")+money(value(x));const o=document.createElement("span");o.className="transaction-original";o.textContent=money(x.originalAmount,x.originalCurrency);a.append(o);li.append(info,a);if(del&&!x.recurring){const b=document.createElement("button");b.className="delete-button";b.dataset.deleteId=x.id;b.textContent=tr("delete");li.append(b)}return li}
     function dashboard(){const s=spent(),b=budget(),left=b-s,p=b?s/b*100:0;$("#spentTotal").textContent=money(s);$("#remainingTotal").textContent=money(left);$("#remainingTotal").classList.toggle("negative",left<0);$("#budgetTotal").textContent=money(b);$("#transactionCount").textContent=tr("recordsFound",{count:records().length});$("#budgetMeter").style.width=Math.min(p,100)+"%";$("#budgetMeter").classList.toggle("over",p>100);$("#budgetPercent").textContent=Math.round(p)+"%";const recent=records().sort((a,z)=>z.date.localeCompare(a.date)||z.createdAt.localeCompare(a.createdAt)).slice(0,3);$("#recentList").replaceChildren(...(recent.length?recent.map(x=>node(x)):[empty()]));const top=C.map(c=>({id:c[0],s:catSpent(c[0]),l:catLimit(c[0])})).filter(x=>x.s||x.l).sort((a,z)=>z.s-a.s).slice(0,5),box=$("#categoryPreview");box.innerHTML="";if(!top.length)box.append(empty());top.forEach(x=>{const p=x.l?x.s/x.l*100:0,d=document.createElement("div");d.innerHTML='<div class="preview-row-head"><strong>'+esc(catName(x.id))+"</strong><span>"+money(x.s)+" / "+(x.l?money(x.l):tr("noLimit"))+'</span></div><div class="mini-meter"><span class="'+(p>100?"over":"")+'" style="width:'+Math.min(p,100)+'%"></span></div>';box.append(d)})}
     function filtered(){let l=records(),c=$("#filterCategory").value,k=$("#filterType").value,r=$("#filterRange").value;if(c!=="all")l=l.filter(x=>x.category===c);if(k!=="all")l=l.filter(x=>x.type===k);const n=new Date(),w=new Date(n);w.setDate(n.getDate()-((n.getDay()+6)%7));w.setHours(0,0,0,0);if(r==="month")l=l.filter(x=>month(x.date));if(r==="week")l=l.filter(x=>new Date(x.date+"T12:00:00")>=w);if(r==="custom"){const a=$("#customStart").value,z=$("#customEnd").value;if(a)l=l.filter(x=>x.date>=a);if(z)l=l.filter(x=>x.date<=z)}const q=$("#sortHistory").value;l.sort((a,z)=>q==="oldest"?a.date.localeCompare(z.date):q==="high"?value(z)-value(a):q==="low"?value(a)-value(z):z.date.localeCompare(a.date)||z.createdAt.localeCompare(a.createdAt));return l}
@@ -772,7 +772,7 @@
     $("#recurringForm").onsubmit=e=>{e.preventDefault();const id=$("#recurringId").value,b={id:id||crypto.randomUUID(),description:$("#recurringDescription").value.trim(),category:$("#recurringCategory").value,type:recurringType,originalAmount:+$("#recurringAmount").value,originalCurrency:$("#recurringCurrency").value,period:$("#recurringPeriod").value,customDays:+$("#recurringCustomDays").value||30,startDate:$("#recurringStart").value,endDate:$("#recurringEnd").value};if(id)state.recurringBills=state.recurringBills.map(x=>x.id===id?b:x);else state.recurringBills.push(b);save();closeRecurring();render();toast(tr("recurringSaved"))};
     $("#recurringList").onclick=e=>{const edit=e.target.closest("[data-edit-bill]"),del=e.target.closest("[data-delete-bill]");if(edit)openRecurring(state.recurringBills.find(b=>b.id===edit.dataset.editBill));if(del){state.recurringBills=state.recurringBills.filter(b=>b.id!==del.dataset.deleteBill);save();render();toast(tr("recurringDeleted"))}};
     $("#storeGrid").onclick=e=>{const b=e.target.closest("[data-buy]");if(!b)return;const item=ITEMS.find(i=>i[0]===b.dataset.buy);if(state.pennyBalance<item[3]){toast(tr("notEnough"));return}state.pennyBalance-=item[3];state.purchases.push(item[0]);if(item[0]==="dark"||item[0]==="warm")state.activeTheme=item[0];save();coinSound();render()};
-    const close=()=>{$("#settingsBackdrop").hidden=true;document.body.style.overflow=""};$("#settingsButton").onclick=()=>{$("#settingsBackdrop").hidden=false;document.body.style.overflow="hidden"};$("#closeSettingsButton").onclick=close;$("#settingsBackdrop").onclick=e=>{if(e.target===$("#settingsBackdrop"))close()};$("#avatarButton").onclick=()=>$("#accountMenu").hidden=!$("#accountMenu").hidden;document.addEventListener("click",e=>{if(!e.target.closest(".top-actions"))$("#accountMenu").hidden=true});$("#switchAccountButton").onclick=$("#logoutButton").onclick=()=>{localStorage.removeItem(AUTH);location.replace("login.html")};
+    const close=()=>{$("#settingsBackdrop").hidden=true;document.body.style.overflow=""};$("#settingsButton").onclick=()=>{$("#settingsBackdrop").hidden=false;document.body.style.overflow="hidden"};$("#closeSettingsButton").onclick=close;$("#settingsBackdrop").onclick=e=>{if(e.target===$("#settingsBackdrop"))close()};const closeAccount=()=>{$("#accountMenu").hidden=true;$("#avatarButton").setAttribute("aria-expanded","false")};$("#avatarButton").onclick=e=>{e.stopPropagation();const opening=!$("#accountMenu").hidden;$("#accountMenu").hidden=opening;$("#avatarButton").setAttribute("aria-expanded",String(!opening))};document.addEventListener("click",e=>{if(!e.target.closest("#accountMenu"))closeAccount()});$("#logoutButton").onclick=()=>{localStorage.removeItem(AUTH);location.replace("login.html")};
     $("#fontSizeSelect").onchange=e=>{state.accessibility.fontSize=e.target.value;save();access()};$("#buttonOutlineToggle").onchange=e=>{state.accessibility.buttonOutline=e.target.checked;save();access()};$("#highContrastToggle").onchange=e=>{state.accessibility.highContrast=e.target.checked;save();access()};$("#languageSelect").onchange=e=>{state.language=e.target.value;if(!state.languagesUsed.includes(e.target.value))state.languagesUsed.push(e.target.value);save();render()};$("#defaultCurrencySelect").onchange=e=>{state.defaultCurrency=e.target.value;save();render()};$("#themeSelect").onchange=e=>{state.activeTheme=e.target.value;save();access()};
     $("#deleteDataButton").onclick=()=>{if(!confirm(tr("confirmDelete")))return;state=fresh();state.transactions=[];state.budgetCad=0;save();close();render();toast(tr("dataDeleted"))};render();
 
