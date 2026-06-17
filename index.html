@@ -430,15 +430,25 @@
 
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    .startup-wave{position:fixed;inset:0;z-index:120;display:grid;place-items:center;overflow:hidden;background:var(--bg)}
-    .startup-wave.hide{opacity:0;pointer-events:none;transition:opacity .35s ease}
-    .startup-wave-shape{position:absolute;inset:-35% -20%;background:linear-gradient(180deg,#9de8b4 0%,var(--brand) 45%,var(--brand-dark) 100%);border-radius:0 0 48% 52%;transform:translateY(-100%);animation:waveSweep 1.65s cubic-bezier(.2,.8,.2,1) forwards}
-    .startup-wave-shape::after{content:"";position:absolute;left:-8%;right:-8%;bottom:-40px;height:120px;border-radius:50%;background:var(--bg)}
-    .startup-money{position:absolute;left:50%;bottom:18px;z-index:1;transform:translateX(-50%);font-size:clamp(1.6rem,5vw,3rem);letter-spacing:.45rem;text-shadow:0 8px 22px rgba(0,0,0,.18);white-space:nowrap}
-    .startup-brand{position:relative;z-index:2;padding:16px 24px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.82);box-shadow:var(--shadow);color:var(--brand-dark);font-size:clamp(1.6rem,6vw,3.2rem);font-weight:950;animation:brandPulse 1.65s ease both}
-    body.theme-dark .startup-brand{background:rgba(22,33,27,.88);color:var(--text)}
-    @keyframes waveSweep{0%{transform:translateY(-112%)}72%{transform:translateY(22%)}100%{transform:translateY(118%)}}
-    @keyframes brandPulse{0%{opacity:0;transform:translateY(12px) scale(.96)}35%,82%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-10px) scale(1.02)}}
+    .startup-wave{position:fixed;inset:0;z-index:120;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 20% 20%,#dff7e8 0,transparent 32%),radial-gradient(circle at 80% 70%,#c8efd9 0,transparent 30%),linear-gradient(135deg,#fbfaf6 0,#eef8f2 100%)}
+    .startup-wave.hide{opacity:0;pointer-events:none;transition:opacity .42s ease}
+    .startup-glow{position:absolute;width:42vmax;height:42vmax;border-radius:50%;filter:blur(12px);opacity:.45;background:linear-gradient(135deg,#9de8b4,var(--brand));animation:floatGlow 2s ease-in-out both}
+    .startup-glow.one{left:-18vmax;top:-16vmax}.startup-glow.two{right:-20vmax;bottom:-18vmax;animation-delay:.18s}
+    .startup-coin-field{position:absolute;inset:0;pointer-events:none}
+    .startup-coin-field span{position:absolute;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.76);box-shadow:0 14px 36px rgba(22,56,38,.12);font-size:1.55rem;animation:coinDrift 1.85s cubic-bezier(.2,.8,.2,1) both}
+    .startup-coin-field span:nth-child(1){left:14%;top:22%;animation-delay:.05s}.startup-coin-field span:nth-child(2){left:78%;top:18%;animation-delay:.18s}.startup-coin-field span:nth-child(3){left:18%;top:72%;animation-delay:.28s}.startup-coin-field span:nth-child(4){left:82%;top:68%;animation-delay:.38s}.startup-coin-field span:nth-child(5){left:49%;top:12%;animation-delay:.48s}
+    .startup-card{position:relative;z-index:2;display:grid;justify-items:center;gap:12px;width:min(420px,calc(100% - 44px));padding:34px 30px;border:1px solid rgba(220,229,223,.9);border-radius:32px;background:rgba(255,255,255,.78);box-shadow:0 26px 70px rgba(22,56,38,.14);backdrop-filter:blur(18px);animation:cardBloom 1.7s cubic-bezier(.2,.8,.2,1) both}
+    .startup-logo{display:grid;place-items:center;width:84px;height:84px;border-radius:28px;color:#fff;background:linear-gradient(145deg,var(--brand),#22b66d);box-shadow:0 16px 34px rgba(23,107,69,.28);font-size:2.7rem;animation:logoPop 1.4s ease both}
+    .startup-brand{color:var(--brand-dark);font-size:clamp(2rem,7vw,3.4rem);font-weight:950;letter-spacing:-.05em;line-height:1}
+    .startup-subtitle{color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem}
+    .startup-loader{width:min(220px,70%);height:9px;margin-top:8px;overflow:hidden;border-radius:999px;background:#dce5df}
+    .startup-loader span{display:block;width:48%;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--brand),#63d58f);animation:loadSweep 1.35s ease-in-out infinite}
+    body.theme-dark .startup-wave{background:radial-gradient(circle at 20% 20%,rgba(35,105,70,.38),transparent 34%),radial-gradient(circle at 80% 70%,rgba(47,144,94,.25),transparent 30%),linear-gradient(135deg,#0d1511 0,#16211b 100%)}body.theme-dark .startup-card{background:rgba(22,33,27,.78);border-color:#3d5a49}body.theme-dark .startup-coin-field span{background:rgba(30,48,38,.82)}
+    @keyframes cardBloom{0%{opacity:0;transform:translateY(20px) scale(.94)}35%,82%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-14px) scale(.98)}}
+    @keyframes logoPop{0%{transform:scale(.75) rotate(-8deg)}45%{transform:scale(1.08) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+    @keyframes coinDrift{0%{opacity:0;transform:translateY(28px) scale(.78) rotate(-18deg)}30%,80%{opacity:1}100%{opacity:0;transform:translateY(-26px) scale(1.05) rotate(14deg)}}
+    @keyframes floatGlow{0%{transform:scale(.85);opacity:.1}55%{opacity:.48}100%{transform:scale(1.1);opacity:.22}}
+    @keyframes loadSweep{0%{transform:translateX(-105%)}100%{transform:translateX(220%)}}
     .slides-backdrop{position:fixed;inset:0;z-index:110;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,var(--bg),var(--surface-soft));overflow:hidden}
     .slides-backdrop[hidden]{display:none}
     .slides-shell{width:min(760px,100%);padding:28px;border:1px solid var(--border);border-radius:30px;background:var(--surface);box-shadow:0 24px 60px rgba(22,56,38,.16)}
@@ -511,8 +521,17 @@
 </head>
 <body>
   <div class="startup-wave" id="startupWave" aria-hidden="true">
-    <div class="startup-wave-shape"><div class="startup-money">💵 🪙 💸 🪙</div></div>
-    <div class="startup-brand">PennyWiseBT</div>
+    <div class="startup-glow one"></div>
+    <div class="startup-glow two"></div>
+    <div class="startup-coin-field">
+      <span>💵</span><span>🪙</span><span>💰</span><span>💸</span><span>📊</span>
+    </div>
+    <div class="startup-card">
+      <div class="startup-logo">💰</div>
+      <div class="startup-brand">PennyWiseBT</div>
+      <div class="startup-subtitle">Plan. Save. Grow.</div>
+      <div class="startup-loader"><span></span></div>
+    </div>
   </div>
 
   <section class="slides-backdrop" id="onboardingSlides" role="dialog" aria-modal="true" aria-labelledby="slideTitle" hidden>
@@ -1071,7 +1090,7 @@
     function closeSlidesToBudget(){markSlidesSeen();$("#onboardingSlides").hidden=true;openOnboardingBudget()}
     function runFirstStepChecks(){checkMonthlyGoalReminder();checkMonthlyReset();checkLoginBudgetSummary()}
     function afterStartup(){page("dashboard");if(!slidesSeen())showSlides();else if(state.hasSeenOnboarding)runFirstStepChecks();else showOnboarding()}
-    function playStartup(){const wave=$("#startupWave");setTimeout(()=>{wave.classList.add("hide");setTimeout(()=>{wave.remove();afterStartup()},380)},1700)}
+    function playStartup(){const wave=$("#startupWave");setTimeout(()=>{wave.classList.add("hide");setTimeout(()=>{wave.remove();afterStartup()},420)},1900)}
     const currentMonth=()=>monthString();function monthlyBudgetExists(){return state.budgetCad>0||categoriesAll().some(c=>(state.categoryLimitsCad[c[0]]||0)>0)}
     function monthlyResetCategories(){const box=$("#monthlyResetCategories");box.innerHTML="";categoriesAll().filter(c=>(state.categoryLimitsCad[c[0]]||0)>0).forEach(c=>{const row=document.createElement("div"),amount=conv(state.categoryLimitsCad[c[0]],"CAD",state.defaultCurrency);row.className="onboarding-category";row.innerHTML='<label for="month-'+c[0]+'">'+esc(catName(c[0]))+'</label><input id="month-'+c[0]+'" data-monthly-limit="'+c[0]+'" type="number" min="0" step=".01" value="'+amount.toFixed(state.defaultCurrency==="JPY"?0:2)+'">';box.append(row)})}
     function closeMonthlyReset(){state.lastSeenMonth=currentMonth();save();$("#monthlyResetBackdrop").hidden=true;document.body.style.overflow=""}
